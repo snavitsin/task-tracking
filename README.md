@@ -1,0 +1,2 @@
+# pspu
+study
