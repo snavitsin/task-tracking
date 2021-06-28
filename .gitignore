@@ -14,3 +14,7 @@
 /node_modules
 
 .env
+/public/
+/public/*
+package-lock.json
+composer.lock

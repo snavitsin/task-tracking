@@ -1,0 +1,92 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+@media (min-width: 1400px) {
+  .container, .container-sm, .container-md, .container-lg, .container-xl {
+    max-width: 1340px;
+  }
+}
+
+
+.button {
+  display: block;
+  width: 100%;
+  padding: 0 20px;
+  border: 1px solid transparent;
+
+  text-align: center;
+  text-transform: uppercase;
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 48px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  outline: none;
+  border-radius: 2px;
+  cursor: pointer;
+
+  background-color: var(--accent-color);
+  color: #fff;
+
+  transition: .2s;
+
+  &:hover,
+  &:focus {
+    background-image: linear-gradient(rgba(255, 255, 255, .04), rgba(255, 255, 255, .04));
+  }
+
+  &:active {
+    background-image: linear-gradient(rgba(0, 0, 0, .04), rgba(0, 0, 0, .04));
+  }
+
+  &[disabled] {
+    cursor: default;
+    opacity: .4;
+  }
+
+  &--positive {
+    --accent-color: #168E47FF;
+  }
+
+  &--negative {
+    --accent-color: #EB3D00FF;
+  }
+
+  &--neutral {
+    --accent-color: #D3D8DBFF;
+  }
+
+  &--invert {
+    background-color: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+
+    &:hover, &:focus, &:active {
+      background-color: var(--accent-color);
+      color: #fff;
+    }
+  }
+
+  &--white {
+    background-color: transparent;
+    color: #fff;
+    border: 1px solid #fff;
+
+    &:active {
+      background-color: #fff;
+      background-image: none;
+      color: var(--accent-color);
+    }
+  }
+}
