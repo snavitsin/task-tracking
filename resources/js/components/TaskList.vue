@@ -473,20 +473,10 @@ export default {
   }
 
   &__controls {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(3, 250px);
+    grid-gap: 20px;
     align-items: flex-end;
-  }
-
-  &__controls > * {
-    width: auto;
-    min-width: 250px;
-    max-width: 600px;
-  }
-
-  &__controls > * + * {
-    margin-left: 20px;
   }
 
   &__checkbox {

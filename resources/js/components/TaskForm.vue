@@ -295,7 +295,7 @@ export default {
 
   &__controls {
     display: grid;
-    grid-template-columns: repeat(3, 400px);
+    grid-template-columns: repeat(3, 325px);
     grid-gap: 20px;
 
     align-items: end;
@@ -310,7 +310,7 @@ export default {
 
   &__buttons {
     display: grid;
-    grid-template-columns: repeat(3, 400px);
+    grid-template-columns: repeat(3, 325px);
     align-items: flex-end;
     grid-gap: 20px;
   }
