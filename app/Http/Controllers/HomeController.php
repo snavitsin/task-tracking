@@ -100,6 +100,87 @@ class HomeController extends Controller
         return response($tasks);
     }
 
+    public function getTaskStatistics(Request $request){
+        $params = $request->post('params', []);
+
+        $this->model = new HomeModel($params);
+        $tasks = $this->model->getTaskStatistics();
+
+        return response($tasks);
+    }
+
+    public function getProjectEmployees(Request $request){
+        $params = $request->post('params', []);
+
+        $this->model = new HomeModel($params);
+
+        $developers = $this->model->getProjectEmployees('Разработчик');
+        $testers = $this->model->getProjectEmployees('Тестировщик');
+
+        $employees = ['devs' => $developers, 'testers' => $testers];
+
+        return response($employees);
+    }
+
+    public function exportComments(){
+        $this->model = new HomeModel(['emp_id' => Auth::user()->emp_id]);
+        $comments = $this->model->getComments( !Auth::user()->hasRole('manager'));
+        foreach ($comments as &$comment){
+            $comment = get_object_vars($comment);
+        }
+        $res['data'] = $comments;
+
+        $properties = array_keys($comments[0]);
+        $res['columns'] = $properties;
+        return $this->getExportCsv($res, 'comments');
+    }
+
+    public function exportTasks(){
+        $this->model = new HomeModel(['emp_id' => Auth::user()->emp_id]);
+        $tasks = $this->model->getTasks( !Auth::user()->hasRole('manager'));
+        foreach ($tasks as &$task){
+            $task = get_object_vars($task);
+        }
+        $res['data'] = $tasks;
+
+        $properties = array_keys($tasks[0]);
+        $res['columns'] = $properties;
+
+        return $this->getExportCsv($res, 'tasks');
+    }
+
+    public function exportStatistics(){
+        $this->model = new HomeModel(['emp_id' => Auth::user()->emp_id]);
+        $stats = $this->model->getTaskStatistics();
+        foreach ($stats as &$stat){
+            $stat = get_object_vars($stat);
+        }
+        $res['data'] = $stats;
+        $properties = array_keys($stats[0]);
+        $res['columns'] = $properties;
+
+        return $this->getExportCsv($res, 'stats');
+    }
+
+    protected function getExportCsv($res = [], $fileName = 'file'){
+
+        $fileName .= '.csv';
+
+        $data = $res['data'];
+        $columns = $res['columns'];
+
+        $file = fopen($fileName, 'w');
+        //BOM-mark
+        fputs($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        fputcsv($file, $columns, ';');
+
+        foreach($data as $row){
+            fputcsv($file, $row, ';');
+        }
+        fclose($file);
+        return response()->download($fileName)->deleteFileAfterSend(true);
+    }
+
     /**
      * Show the application dashboard.
      *
@@ -112,7 +193,8 @@ class HomeController extends Controller
             'tasks' => $this->model->getTasks(),
             'comments' => $this->model->getComments( !Auth::user()->hasRole('manager')),
             'employees' => $this->model->getEmployees(),
-            'projects' => $this->model->getProjects()
+            'projects' => $this->model->getProjects(),
+            'statistics' => $this->model->getTaskStatistics(),
         ];
         return view('home', $data);
     }

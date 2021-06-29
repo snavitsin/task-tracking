@@ -25,6 +25,7 @@
       <button
       @click="createTask"
       v-text="'Создать комментарий'"
+      :disabled="!emptyText"
       class="button button--positive"/>
     </div>
   </div>
@@ -47,12 +48,18 @@ export default {
   },
   data() {
     return {
-      commentText: null,
+      commentText: '',
     }
   },
   methods: {
     createTask(){
       this.$emit('comment:create', this.commentText);
+    }
+  },
+
+  computed: {
+    emptyText(){
+      return this.commentText.length;
     }
   }
 }

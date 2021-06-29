@@ -30,7 +30,10 @@ class HomeModel extends Model
         'task_deadline',
         'task_project',
         'comment_id',
-        'comment_text'
+        'comment_text',
+        'only_emp_stats',
+        'task_dev',
+        'task_tester'
     ];
 
     public function __construct($values = [])
@@ -50,10 +53,56 @@ class HomeModel extends Model
         $taskId = $this->attributes['task_id'];
         $taskDesc = $this->attributes['task_desc'];
         $taskStatus = $this->attributes['task_status'];
+        $taskDev = $this->attributes['task_dev'];
+        $taskTester = $this->attributes['task_tester'];
 
-        return DB::table('Tasks')
+        DB::table('Tasks')
             ->where('task_id', $taskId)
             ->update(['task_desc' => $taskDesc, 'task_status' => $taskStatus]);
+
+
+        $dev = DB::table('Ref_task_emp')
+            ->where([
+                ['ref_task_emp_task', '=', $taskId],
+                ['ref_task_emp_role', '=', 'Разработчик'],
+            ])->get();
+
+        if(count($dev)){
+            DB::table('Ref_task_emp')
+                ->where([
+                    ['ref_task_emp_task', '=', $taskId],
+                    ['ref_task_emp_role', '=', 'Разработчик'],
+                ])->update(['ref_task_emp_emp' => $taskDev]);
+        } else {
+            DB::table('Ref_task_emp')
+                ->insert([
+                    'ref_task_emp_task' => $taskId,
+                    'ref_task_emp_role' => 'Разработчик',
+                    'ref_task_emp_emp' => $taskDev,
+                    ]);
+        }
+
+
+        $tester = DB::table('Ref_task_emp')
+            ->where([
+                ['ref_task_emp_task', '=', $taskId],
+                ['ref_task_emp_role', '=', 'Тестировщик'],
+            ])->get();
+
+        if(count($tester)){
+            DB::table('Ref_task_emp')
+                ->where([
+                    ['ref_task_emp_task', '=', $taskId],
+                    ['ref_task_emp_role', '=', 'Тестировщик'],
+                ])->update(['ref_task_emp_emp' => $taskTester]);
+        } else {
+            DB::table('Ref_task_emp')
+                ->insert([
+                    'ref_task_emp_task' => $taskId,
+                    'ref_task_emp_role' => 'Тестировщик',
+                    'ref_task_emp_emp' => $taskTester,
+                ]);
+        }
     }
 
     public function createTask()
@@ -78,7 +127,23 @@ class HomeModel extends Model
             $this->attributes['task_project'],
         ];
 
-        return DB::select("exec createTask '$params[0]', '$params[1]', '$params[2]', '$params[3]', '$params[4]', '$params[5]', $params[6]");
+        $taskId = DB::select("exec createTask '$params[0]', '$params[1]', '$params[2]', '$params[3]', '$params[4]', '$params[5]', $params[6]");
+        $taskId = array_shift($taskId);
+        $taskId = $taskId->task_id;
+
+        DB::table('Ref_task_emp')
+            ->insert([
+                'ref_task_emp_task' => $taskId,
+                'ref_task_emp_role' => 'Разработчик',
+                'ref_task_emp_emp' => $this->attributes['task_dev'],
+            ]);
+
+        DB::table('Ref_task_emp')
+            ->insert([
+                'ref_task_emp_task' => $taskId,
+                'ref_task_emp_role' => 'Тестировщик',
+                'ref_task_emp_emp' => $this->attributes['task_tester'],
+            ]);
     }
 
     public function deleteComment()
@@ -127,11 +192,50 @@ class HomeModel extends Model
     {
         $empId = $this->attributes['emp_id'];
         $sql = $ownTasks ? "exec getTasksByEmp $empId" : "exec getTasksByEmp";
+        $tasks =  DB::select($sql);
+
+        foreach ($tasks as $task){
+            $task->task_dev = $this->getTaskOperators($task->task_id, 'Разработчик');
+            $task->task_tester = $this->getTaskOperators($task->task_id, 'Тестировщик');
+        }
+
+        return $tasks;
+    }
+
+    public function getTaskOperators($taskId, $operator)
+    {
+        $employee = DB::select("getTaskOperator $taskId, $operator");
+        if (!$employee) return null;
+
+        $employee = array_shift($employee);
+        return $employee->emp_id;
+    }
+
+    public function getTaskStatistics()
+    {
+        $empStats = $this->attributes['only_emp_stats'] ?? false;
+        $empId = $this->attributes['emp_id'] ?? null;
+        $sql = $empStats ? "exec getTaskStatistics $empId" : "exec getTaskStatistics";
+
         return DB::select($sql);
     }
 
     public function getEmployees(){
-        return DB::select("exec getEmployees");
+        $employees = DB::select("exec getEmployees");
+        foreach ($employees as &$employee){
+            $employee->emp_fio = "$employee->emp_surname $employee->emp_name $employee->emp_patroname";
+        }
+        return $employees;
+    }
+
+    public function getProjectEmployees($empPosition){
+        $projectId = $this->attributes['task_project'];
+        $employees = DB::select("exec getProjectEmps $projectId, $empPosition");
+
+        foreach ($employees as &$employee){
+            $employee->emp_fio = "$employee->emp_surname $employee->emp_name $employee->emp_patroname";
+        }
+        return $employees;
     }
 
     public function getProjects(){

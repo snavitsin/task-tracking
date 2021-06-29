@@ -23,6 +23,7 @@
                                  'comments' => $comments,
                                   'employees' => $employees,
                                   'projects' => $projects,
+                                  'statistics' => $statistics,
                                   'isManager' => true]) }}"/>
                         @endrole
 
@@ -34,6 +35,7 @@
                                  'comments' => $comments,
                                   'employees' => $employees,
                                   'projects' => $projects,
+                                  'statistics' => $statistics,
                                   'isDeveloper' => true]) }}"/>
                         @endrole
 
@@ -44,6 +46,7 @@
                          'comments' => $comments,
                           'employees' => $employees,
                           'projects' => $projects,
+                          'statistics' => $statistics,
                           'isTester' => true]) }}"/>
                         @endrole
 

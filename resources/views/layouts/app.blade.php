@@ -89,6 +89,9 @@
         <portal-target
                 name="modals"
                 multiple/>
+
+        <notifications
+        classes="notification-alert"/>
     </div>
 </body>
 </html>

@@ -1,9 +1,11 @@
 <template>
   <div class="task-form">
-    <div class="task-form__content">
+    <div
+    v-if="ownTasks === true || isManager === true"
+    class="task-form__content">
 
       <div class="task-form__instruction">
-        Выберите задачу из списка задач, чтобы заполнить поля.
+        Выберите задачу из списка, чтобы заполнить поля.
       </div>
 
       <div class="task-form__controls">
@@ -12,7 +14,7 @@
         v-model="taskObj.task_title"
         :title="'Заголовок задачи'"
         :data-vv-as="'Заголовок задачи'"
-        :disabled="!!taskObj.task_id"
+        :disabled="!!taskObj.task_id || !isManager"
         name="taskTitle"
         class="task-form__textarea"/>
 
@@ -23,33 +25,89 @@
         name="taskDesc"
         class="task-form__textarea"/>
 
-        <date-picker
-        v-model="taskObj.task_deadline"
-        :disabled="!!taskObj.task_id"
-        value-type="YYYY-MM-DD HH:mm:ss"
-        format="YYYY-MM-DD HH:mm:ss"/>
+        <div class="task-form__field-container">
+          <div
+          v-text="'Срок исполнения'"
+          class="task-form__datepicker-title"/>
+          <date-picker
+          v-model="taskObj.task_deadline"
+          :disabled="!!taskObj.task_id || !isManager"
+          value-type="YYYY-MM-DD HH:mm:ss"
+          format="YYYY-MM-DD HH:mm:ss"/>
+        </div>
 
-        <field-dropdown
-        :data="statuses"
-        v-model="taskObj.task_status"
-        placeholder="Статус"
-        class="task-form__dropdown"/>
+        <div class="task-form__field-container">
+          <div
+          v-text="'Статус'"
+          class="task-form__datepicker-title"/>
 
-        <field-dropdown
-        :data="priority"
-        v-model="taskObj.task_priority"
-        :disabled="!!taskObj.task_id"
-        placeholder="Приоритет"
-        class="task-form__dropdown"/>
+          <field-dropdown
+          v-model="taskObj.task_status"
+          :data="statuses"
+          placeholder="Статус"
+          class="task-form__dropdown"/>
+        </div>
 
-        <field-dropdown
-        :data="projects"
-        v-model="taskObj.task_project"
-        :disabled="!!taskObj.task_id"
-        valueName="project_id"
-        labelName="project_title"
-        placeholder="Проект"
-        class="task-form__dropdown"/>
+        <div class="task-form__field-container">
+          <div
+          v-text="'Приоритет'"
+          class="task-form__datepicker-title"/>
+
+          <field-dropdown
+          v-model="taskObj.task_priority"
+          :data="priority"
+          :disabled="!!taskObj.task_id || !isManager"
+          placeholder="Приоритет"
+          class="task-form__dropdown"/>
+        </div>
+
+
+        <div class="task-form__field-container">
+          <div
+          v-text="'Проект'"
+          class="task-form__datepicker-title"/>
+
+          <field-dropdown
+          @input="handleProjectInput"
+          v-model="taskObj.task_project"
+          :data="projects"
+          :disabled="!!taskObj.task_id || !isManager"
+          valueName="project_id"
+          labelName="project_title"
+          placeholder="Проект"
+          class="task-form__dropdown"/>
+        </div>
+
+        <div class="task-form__field-container">
+          <div
+          v-text="'Разработчик'"
+          class="task-form__datepicker-title"/>
+
+          <field-dropdown
+          v-model="taskObj.task_dev"
+          :data="projectDevs"
+          :disabled="!!taskObj.task_id || !isManager"
+          valueName="emp_id"
+          labelName="emp_fio"
+          placeholder="Разработчик"
+          class="task-form__dropdown"/>
+        </div>
+
+
+        <div class="task-form__field-container">
+          <div
+          v-text="'Тестировщик'"
+          class="task-form__datepicker-title"/>
+
+          <field-dropdown
+          v-model="taskObj.task_tester"
+          :data="projectTesters"
+          :disabled="!!taskObj.task_id || !isManager"
+          valueName="emp_id"
+          labelName="emp_fio"
+          placeholder="Тестировщик"
+          class="task-form__dropdown"/>
+        </div>
       </div>
 
 
@@ -69,6 +127,7 @@
         v-if="isManager"
         @click="createTask"
         v-text="'Создать'"
+        :disabled="!!taskObj.task_id"
         class="button button--positive"/>
 
         <button
@@ -76,6 +135,14 @@
         @click="deleteTask"
         v-text="'Удалить'"
         class="button button--negative"/>
+
+        <a
+        v-if="isManager === true"
+        :href="`${baseUrl}/home/tasks/export`"
+        target="_blank"
+        download="tasks.csv"
+        v-text="'Экспорт'"
+        class="button button--neutral"/>
       </div>
     </div>
   </div>
@@ -100,7 +167,9 @@ export default {
     task: { type: Object, default: null },
     projects: { type: Array, default: [] },
     statuses: { type: Array, default: [] },
-    employees: { type: Array, default: [] }
+    employees: { type: Array, default: [] },
+    projectDevs: { type: Array, default: [] },
+    projectTesters: { type: Array, default: [] },
   },
   data(){
     const emptyTaskValues = {
@@ -110,37 +179,76 @@ export default {
       'task_priority': null,
       'task_deadline': null,
       'task_project': null,
+      'task_dev': null,
+      'task_tester': null,
     };
 
     return {
 
-      emptyTask: emptyTaskValues,
+      emptyTask: { ...emptyTaskValues},
 
       priority: [
         'Низкий', 'Средний', 'Важный'
       ],
 
-      taskObj: this.task ? { ...this.task } : emptyTaskValues,
+      taskObj: this.task ? { ...this.task } : { ...emptyTaskValues },
+
+      baseUrl: window.location.origin,
     }
   },
   methods: {
+
+    handleProjectInput(val){
+      this.$emit('task-form:project', val)
+    },
+
     editTask(){
+      if(!this.taskObj.task_id) {
+        this.$notify({
+          type: 'warn',
+          text: 'Необходимо выбрать задачу для редактирования'
+        });
+        return;
+      }
       this.$emit('task-form:edit', this.taskObj);
+      this.resetTask();
     },
 
     createTask(){
+      const emptyFields = Object.keys(this.taskObj).filter( key => this.taskObj[key] === null );
+      if(emptyFields.length){
+        this.$notify({
+          type: 'warn',
+          text: 'Необходимо заполнить все поля для создания задачи'
+        });
+        return;
+      }
+
       const deadlineDate = new Date(this.taskObj.task_deadline);
       const nowDate = new Date();
 
-      if(nowDate > deadlineDate)
-        console.log('error');
+      if(!this.taskObj.task_id && nowDate > deadlineDate) {
+        this.$notify({
+          type: 'warn',
+          text: 'Срок исполнения задачи не может быть раньше текущей даты'
+        });
+        return;
+      }
 
-      return;
       this.$emit('task-form:create', this.taskObj);
+      this.resetTask();
     },
 
     deleteTask(){
+      if(!this.taskObj.task_id) {
+        this.$notify({
+          type: 'warn',
+          text: 'Необходимо выбрать задачу для удаления'
+        });
+        return;
+      }
       this.$emit('task-form:delete', this.taskObj.task_id);
+      this.resetTask();
     },
 
     editEmployees(){
@@ -148,6 +256,7 @@ export default {
     },
 
     resetTask(){
+      this.$emit('task-form:reset');
       this.taskObj = { ...this.emptyTask };
     }
   },
@@ -159,7 +268,8 @@ export default {
     task: {
       handler(){
         this.taskObj = { ...this.task };
-      }
+      },
+      deep: true,
     }
   },
 
@@ -185,7 +295,7 @@ export default {
 
   &__controls {
     display: grid;
-    grid-template-columns: repeat(3, minmax(200px, auto));
+    grid-template-columns: repeat(3, 400px);
     grid-gap: 20px;
 
     align-items: end;
