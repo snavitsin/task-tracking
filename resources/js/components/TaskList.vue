@@ -21,31 +21,17 @@
             class="task-list__checkbox"/>
           </template>
 
-          <field-dropdown
-          v-if="filters.own_tasks === true || isManager === true"
-          :data="statuses"
-          v-model="selectedStatus"
-          class="task-list__dropdown"/>
-
-          <field-textarea
-          v-if="filters.own_tasks === true || isManager === true"
-          v-model="taskDesc"
-          :title="'Описание задачи'"
-          :data-vv-as="'Описание задачи'"
-          name="taskDesc"
-          class="task-list__textarea"/>
-
-          <button
-          v-if="filters.own_tasks === true || isManager === true"
-          @click="editTask"
-          v-text="'Редактировать'"
-          class="button button--positive"/>
-
-          <button
-          v-if="isManager"
-          @click="deleteTask"
-          v-text="'Удалить'"
-          class="button button--positive"/>
+          <task-form
+          @task-form:edit="editTask"
+          @task-form:create="createTask"
+          @task-form:delete="deleteTask"
+          :task="selectedTask"
+          :projects="projects"
+          :statuses="statuses"
+          :employees="propsData.employees"
+          :is-manager="isManager"
+          :own-tasks="filters.own_tasks"
+          />
         </div>
 
         <data-table
@@ -86,7 +72,7 @@
           <button
           @click="deleteComment"
           v-text="'Удалить'"
-          class="button button--positive"/>
+          class="button button--negative"/>
         </div>
 
         <data-table
@@ -99,14 +85,6 @@
       </template>
 
       <template v-if="selectedTab === 3">
-
-        <div class="task-list__controls">
-
-          создание задачи
-        </div>
-      </template>
-
-      <template v-if="selectedTab === 4">
         <div class="task-list__controls">
 
           статистика
@@ -141,10 +119,11 @@ import DataTable from './DataTable';
 import FieldCheckbox from './FieldCheckbox';
 import FieldDropdown from './FieldDropdown';
 import FieldTextarea from './FieldTextarea';
+import TaskForm from './TaskForm';
 
 export default {
   name: "TaskList",
-  components: { FieldTextarea, Tabs, FieldCheckbox, Task, DataTable, FieldDropdown },
+  components: { FieldTextarea, Tabs, FieldCheckbox, Task, DataTable, FieldDropdown, TaskForm },
   props: {
     propsData: { type: Object, default: null },
   },
@@ -164,6 +143,8 @@ export default {
 
       tasks: this.propsData.tasks,
       comments: this.propsData.comments,
+
+      projects: this.propsData.projects,
 
       filters: {
         own_tasks: false,
@@ -202,21 +183,27 @@ export default {
       this.isModalShown = false;
     },
 
-    async deleteTask() {
-      if(!this.selectedTask) return;
-      const params = { task_id: this.selectedTask.task_id };
+    async deleteTask(taskId) {
+      if(!taskId) return;
+      const params = { task_id: taskId };
       this.res = await api.post('/home/tasks/delete', params);
 
       await this.getTasks();
       this.closeModal();
     },
 
-    async editTask() {
-      if(!this.selectedTask) return;
-      const params = { task_id: this.selectedTask.task_id,
-        task_desc: this.taskDesc || this.selectedTask.task_desc,
-        task_status: this.selectedStatus || this.selectedTask.task_status };
-      this.res = await api.post('/home/tasks/edit', params);
+    async editTask(taskObj) {
+      if(taskObj || !taskObj.task_id) return;
+      this.res = await api.post('/home/tasks/edit', taskObj);
+
+      await this.getTasks();
+      this.closeModal();
+    },
+
+    async createTask(taskObj = null) {
+      console.log(taskObj);
+      if(!taskObj) return;
+      this.res = await api.post('/home/tasks/create', taskObj);
 
       await this.getTasks();
       this.closeModal();
@@ -272,8 +259,7 @@ export default {
       return this.isManager === true ?
       [{ 'tab_id': 1, 'tab_title': 'Задачи' },
         { 'tab_id': 2, 'tab_title': 'Комментарии' },
-        { 'tab_id': 3, 'tab_title': 'Создание задачи' },
-        { 'tab_id': 4, 'tab_title': 'Статистика' }] :
+        { 'tab_id': 3, 'tab_title': 'Статистика' }] :
 
       [{ 'tab_id': 1, 'tab_title': 'Задачи' },
         { 'tab_id': 2, 'tab_title': 'Комментарии' }]
@@ -315,8 +301,8 @@ export default {
     },
     selectedTask: {
       handler(){
-        this.selectedStatus = this.selectedTask.task_status;
-        this.taskDesc = this.selectedTask.task_desc;
+        this.selectedStatus = this.selectedTask ? this.selectedTask.task_status : null;
+        this.taskDesc = this.selectedTask ? this.selectedTask.task_desc : null;
       }
     },
     selectedComment: {

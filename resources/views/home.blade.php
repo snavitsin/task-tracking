@@ -19,20 +19,32 @@
 
                         @role('manager')
                         <task-list
-                                :props-data="{{ json_encode(['tasks' => $tasks, 'comments' => $comments, 'isManager' => true]) }}"/>
+                                :props-data="{{ json_encode(['tasks' => $tasks,
+                                 'comments' => $comments,
+                                  'employees' => $employees,
+                                  'projects' => $projects,
+                                  'isManager' => true]) }}"/>
                         @endrole
 
                         @role('developer')
 {{--                        {{$user = App\Models\User::find(10)}}--}}
 {{--                        {{dd($user->hasPermissionTo('operate-own-task'))}}--}}
                         <task-list
-                                :props-data="{{ json_encode(['tasks' => $tasks, 'comments' => $comments, 'isDeveloper' => true]) }}"/>
+                                :props-data="{{ json_encode(['tasks' => $tasks,
+                                 'comments' => $comments,
+                                  'employees' => $employees,
+                                  'projects' => $projects,
+                                  'isDeveloper' => true]) }}"/>
                         @endrole
 
                         @role('tester')
                         {{--                        {{$user = App\Models\User::find(10)}}--}}
                         {{--                        {{dd($user->hasPermissionTo('operate-own-task'))}}--}}
-                        <task-list :props-data="{{ json_encode(['tasks' => $tasks, 'comments' => $comments, 'isTester' => true]) }}"/>
+                        <task-list :props-data="{{ json_encode(['tasks' => $tasks,
+                         'comments' => $comments,
+                          'employees' => $employees,
+                          'projects' => $projects,
+                          'isTester' => true]) }}"/>
                         @endrole
 
                 </div>

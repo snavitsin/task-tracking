@@ -24,6 +24,7 @@ Route::group(['middleware' => 'auth'], function(){
     Route::post('/home/tasks', [App\Http\Controllers\HomeController::class, 'getTasks'])->name('tasks');
     Route::post('/home/tasks/edit', [App\Http\Controllers\HomeController::class, 'editTask'])->name('edit_task');
     Route::post('/home/tasks/delete', [App\Http\Controllers\HomeController::class, 'deleteTask'])->name('delete_task');
+    Route::post('/home/tasks/create', [App\Http\Controllers\HomeController::class, 'createTask'])->name('create_task');
 
     Route::post('/home/comments', [App\Http\Controllers\HomeController::class, 'getComments'])->name('comments');
     Route::post('/home/comments/edit', [App\Http\Controllers\HomeController::class, 'editComment'])->name('edit_comment');

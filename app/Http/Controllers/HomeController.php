@@ -44,6 +44,15 @@ class HomeController extends Controller
         return response($result);
     }
 
+    public function createTask(Request $request){
+        $params = $request->post('params');
+        $params = array_merge(['emp_id' => Auth::user()->emp_id], $params);
+
+        $this->model = new HomeModel($params);
+        $result = $this->model->createTask();
+        return response($result);
+    }
+
     public function createComment(Request $request){
         $params = $request->post('params');
         $params = array_merge(['emp_id' => Auth::user()->emp_id], $params);
@@ -99,7 +108,12 @@ class HomeController extends Controller
     public function index()
     {
         $this->model = new HomeModel(['emp_id' => Auth::user()->emp_id]);
-        $data = ['tasks' => $this->model->getTasks(), 'comments' => $this->model->getComments( !Auth::user()->hasRole('manager'))];
+        $data = [
+            'tasks' => $this->model->getTasks(),
+            'comments' => $this->model->getComments( !Auth::user()->hasRole('manager')),
+            'employees' => $this->model->getEmployees(),
+            'projects' => $this->model->getProjects()
+        ];
         return view('home', $data);
     }
 }

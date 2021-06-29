@@ -23,8 +23,12 @@ class HomeModel extends Model
     protected $fillable = [
         'emp_id',
         'task_id',
+        'task_title',
         'task_desc',
         'task_status',
+        'task_priority',
+        'task_deadline',
+        'task_project',
         'comment_id',
         'comment_text'
     ];
@@ -52,6 +56,30 @@ class HomeModel extends Model
             ->update(['task_desc' => $taskDesc, 'task_status' => $taskStatus]);
     }
 
+    public function createTask()
+    {
+//        $params = [
+//            //'task_emp' => $this->attributes['emp_id'],
+//            'task_title' =>  $this->attributes['task_title'],
+//            'task_desc' =>  $this->attributes['task_desc'],
+//            'task_status' =>  $this->attributes['task_status'],
+//            'task_priority' =>  $this->attributes['task_priority'],
+//            'task_created' =>  date('Y-m-d H:i:s'),
+//            'task_deadline' =>  $this->attributes['task_deadline']
+//        ];
+
+        $params = [
+            $this->attributes['task_title'],
+            $this->attributes['task_desc'],
+            $this->attributes['task_status'],
+            $this->attributes['task_priority'],
+            date('Y-m-d H:i:s'),
+            $this->attributes['task_deadline'],
+            $this->attributes['task_project'],
+        ];
+
+        return DB::select("exec createTask '$params[0]', '$params[1]', '$params[2]', '$params[3]', '$params[4]', '$params[5]', $params[6]");
+    }
 
     public function deleteComment()
     {
@@ -100,5 +128,13 @@ class HomeModel extends Model
         $empId = $this->attributes['emp_id'];
         $sql = $ownTasks ? "exec getTasksByEmp $empId" : "exec getTasksByEmp";
         return DB::select($sql);
+    }
+
+    public function getEmployees(){
+        return DB::select("exec getEmployees");
+    }
+
+    public function getProjects(){
+        return DB::table('projects')->get();
     }
 }
