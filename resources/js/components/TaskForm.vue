@@ -309,20 +309,10 @@ export default {
   }
 
   &__buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(3, 400px);
     align-items: flex-end;
-  }
-
-  &__buttons > * {
-    width: auto;
-    min-width: 250px;
-    max-width: 600px;
-  }
-
-  &__buttons > * + * {
-    margin-left: 20px;
+    grid-gap: 20px;
   }
 
   &__checkbox {

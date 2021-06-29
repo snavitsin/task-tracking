@@ -13,7 +13,7 @@
 
         <div class="task-list__controls-container">
 
-          <template v-if="!isManager">
+          <template v-if="!isManager && isDevOrTester">
             <field-checkbox
             v-model="filters.own_tasks"
             :data="['Свои задачи']"
@@ -200,6 +200,10 @@ export default {
       statistics: this.propsData.statistics,
       projects: this.propsData.projects,
 
+      isManager: this.propsData.isManager || false,
+      isDeveloper: this.propsData.isDeveloper || false,
+      isTester: this.propsData.isTester || false,
+
       filters: {
         own_tasks: false,
         own_comments: false,
@@ -221,7 +225,7 @@ export default {
       taskComments: [],
       projectDevs: [],
       projectTesters: [],
-      isManager: this.propsData.isManager,
+
       onlyEmpStats: false,
       isLoading: false,
 
@@ -376,6 +380,10 @@ export default {
   },
 
   computed: {
+    isDevOrTester(){
+      return this.isDeveloper || this.isTester;
+    },
+
     tabs(){
       return this.isManager === true ?
       [{ 'tab_id': 1, 'tab_title': 'Задачи' },

@@ -5,5 +5,7 @@
   "Toggle navigation": "Включить навигацию",
   "Remember Me" : "Запомнить меня",
   "Emp Id": "Id сотрудника",
-  "Task list": "Список задач"
+  "Task list": "Список задач",
+  "Username": "Логин",
+  "Password": "Пароль"
 }
