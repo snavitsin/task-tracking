@@ -127,9 +127,17 @@ class HomeModel extends Model
             $this->attributes['task_project'],
         ];
 
-        $taskId = DB::select("exec createTask '$params[0]', '$params[1]', '$params[2]', '$params[3]', '$params[4]', '$params[5]', $params[6]");
-        $taskId = array_shift($taskId);
-        $taskId = $taskId->task_id;
+        //$taskId = DB::select("exec createTask '$params[0]', '$params[1]', '$params[2]', '$params[3]', '$params[4]', '$params[5]', $params[6]");
+        $taskId = DB::table('Tasks')
+            ->insertGetId([
+                'task_title' =>  $this->attributes['task_title'],
+                'task_desc' =>  $this->attributes['task_desc'],
+                'task_status' =>  $this->attributes['task_status'],
+                'task_priority' =>  $this->attributes['task_priority'],
+                'task_created' =>  date('Y-m-d H:i:s'),
+                'task_deadline' =>  $this->attributes['task_deadline'],
+                'task_project' =>  $this->attributes['task_project']
+            ], 'task_id');
 
         DB::table('Ref_task_emp')
             ->insert([
@@ -180,9 +188,9 @@ class HomeModel extends Model
         $empId = $this->attributes['emp_id'] ?? null;
 
         if($ownComments){
-            $sql = "exec getEmpComments $empId";
+            $sql = "select * from get_emp_comments($empId)";
         } else {
-            $sql = $taskId ? "exec getTaskComments $taskId" : "exec getEmpComments";
+            $sql = $taskId ? "select * from get_task_comments($taskId)" : "select * from get_emp_comments()";
         }
 
         return DB::select($sql);
@@ -191,7 +199,7 @@ class HomeModel extends Model
     public function getTasks($ownTasks = false)
     {
         $empId = $this->attributes['emp_id'];
-        $sql = $ownTasks ? "exec getTasksByEmp $empId" : "exec getTasksByEmp";
+        $sql = $ownTasks ? "select * from get_tasks_by_emp($empId)" : "select * from  get_tasks()";
         $tasks =  DB::select($sql);
 
         foreach ($tasks as $task){
@@ -204,7 +212,7 @@ class HomeModel extends Model
 
     public function getTaskOperators($taskId, $operator)
     {
-        $employee = DB::select("getTaskOperator $taskId, $operator");
+        $employee = DB::select("select * from get_task_operator($taskId, '$operator')");
         if (!$employee) return null;
 
         $employee = array_shift($employee);
@@ -215,13 +223,13 @@ class HomeModel extends Model
     {
         $empStats = $this->attributes['only_emp_stats'] ?? false;
         $empId = $this->attributes['emp_id'] ?? null;
-        $sql = $empStats ? "exec getTaskStatistics $empId" : "exec getTaskStatistics";
+        $sql = $empStats ? "select * from get_task_statistics($empId)" : "select * from get_task_statistics()";
 
         return DB::select($sql);
     }
 
     public function getEmployees(){
-        $employees = DB::select("exec getEmployees");
+        $employees = DB::table('Employees')->select(['emp_id', 'emp_name', 'emp_surname', 'emp_patroname'])->get();
         foreach ($employees as &$employee){
             $employee->emp_fio = "$employee->emp_surname $employee->emp_name $employee->emp_patroname";
         }
@@ -230,7 +238,7 @@ class HomeModel extends Model
 
     public function getProjectEmployees($empPosition){
         $projectId = $this->attributes['task_project'];
-        $employees = DB::select("exec getProjectEmps $projectId, $empPosition");
+        $employees = DB::select("select * from get_emps_by_project($projectId, '$empPosition')");
 
         foreach ($employees as &$employee){
             $employee->emp_fio = "$employee->emp_surname $employee->emp_name $employee->emp_patroname";
@@ -239,6 +247,6 @@ class HomeModel extends Model
     }
 
     public function getProjects(){
-        return DB::table('projects')->get();
+        return DB::table('Projects')->get();
     }
 }
