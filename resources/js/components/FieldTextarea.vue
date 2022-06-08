@@ -87,11 +87,11 @@ export default {
   //   --textarea-border-color
   //   --textarea-border-radius
 
-  --field-textarea-computed-accent-color: #168E47FF;
+  --field-textarea-computed-accent-color: #906fe9;
 
   &__textarea {
     width: 100%;
-    padding: 5px;
+    padding: 10px;
   }
 
   &__inner {

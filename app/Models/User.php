@@ -7,59 +7,115 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRolesAndPermissions;
+    use HasFactory, HasRolesAndPermissions;
+
+    public $timestamps = false;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'employees';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'emp_id';
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $fillable = [
-        'name',
         'emp_id',
-        'email',
-        'password',
+        'emp_name',
+        'emp_patroname',
+        'emp_surname',
+        'emp_subdiv',
+        'emp_position',
+        'emp_mail',
+        'emp_login',
+        'emp_password',
+        'emp_fio',
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
+     * The attributes that should be hidden for serialization.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'emp_password',
+        'emp_remember_token'
     ];
+
+    protected $appends = ['emp_fio'];
+
+    protected $testerId = 1;
+    protected $developerId = 2;
+    protected $managerId = 3;
 
     /**
-     * The attributes that should be cast to native types.
+     * Get the password for the user.
      *
-     * @var array
+     * @return string
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
-    public $timestamps = false;
-
-    public function setUpdatedAt($value)
+    public function getAuthPassword()
     {
-        return NULL;
+        return $this->emp_password;
     }
 
-
-    public function setCreatedAt($value)
+    /**
+     * Возвращает Юзера
+     * @access public
+     * @return array
+     */
+    public static function getUser()
     {
-        return NULL;
+        if (!Auth::check())
+            return null;
+
+        $user = Auth::user();
+        $attributes = $user->attributes;
+        $hidden = $user->hidden;
+
+        $attributes = array_filter($attributes, function($key) use ($hidden) {
+            return array_search($key, $hidden) === false;
+        },ARRAY_FILTER_USE_KEY);
+
+        $roles = $user->roles()->get()->toArray();
+        $attributes['user_roles'] = $roles;
+        return array_change_key_case($attributes, CASE_LOWER);
     }
 
-    public function getEmployee()
-    {
-        return DB::table('Employees')->where('emp_id', $this->attributes['emp_id'])->get()->first();
+    public function getUserId() {
+        return $this->attributes[$this->primaryKey];
+    }
 
+    public static function getEmployeesByRole($position) {
+        $employees = User::where('emp_position', $position)->get()->all();
+//        foreach ($employees as &$employee) {
+//            $employee->attributes['emp_fio'] = User::getEmpFio($employee->attributes);
+//        }
+        return array_values($employees);
+    }
+
+    public static function getEmpFio($attributes) {
+        return $attributes['emp_surname'].' '.$attributes['emp_name'].' '.$attributes['emp_surname'];
+    }
+
+    public function getEmpFioAttribute(){
+        return $this->attributes['emp_surname'].' '.$this->attributes['emp_name'].' '.$this->attributes['emp_patroname'];
+        //return 'abcd';
     }
 }

@@ -4,11 +4,9 @@
     v-if="ownTasks === true || isManager === true"
     class="task-form__content">
 
-      <div class="task-form__instruction">
-        Выберите задачу из списка, чтобы заполнить поля.
-      </div>
-
-      <div class="task-form__controls">
+      <div
+      v-if="false"
+      class="task-form__controls">
 
         <field-textarea
         v-model="taskObj.task_title"
@@ -111,7 +109,8 @@
       </div>
 
 
-      <div class="task-form__buttons">
+      <div class="task-form__buttons"
+      v-if="false">
         <button
         @click="resetTask"
         v-text="'Сбросить'"
@@ -150,9 +149,9 @@
 
 <script>
 
-import FieldCheckbox from './FieldCheckbox';
+import FieldCheckbox from './Fields/FieldCheckbox';
 import FieldTextarea from './FieldTextarea';
-import FieldDropdown from './FieldDropdown';
+import FieldDropdown from './Fields/FieldDropdown';
 import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 

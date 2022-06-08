@@ -1,460 +1,484 @@
 <template>
-  <div class="task-list">
-    <div class="task-list__content">
-
-      <tabs
-      v-model="selectedTab"
-      :data="tabs"
-      value-name="tab_id"
-      label-name="tab_title"
-      class="task-list__tabs"/>
-
-      <template v-if="selectedTab === 1">
-
-        <div class="task-list__controls-container">
-
-          <template v-if="!isManager && isDevOrTester">
-            <field-checkbox
-            v-model="filters.own_tasks"
-            :data="['Свои задачи']"
-            label="Свои задачи"
-            class="task-list__checkbox"/>
-          </template>
-
-          <task-form
-          @task-form:edit="editTask"
-          @task-form:create="createTask"
-          @task-form:delete="deleteTask"
-          @task-form:reset="selectedTask = null"
-          @task-form:project="getProjectEmployees"
-          :task="selectedTask"
-          :projects="projects"
-          :statuses="statuses"
-          :employees="propsData.employees"
-          :project-devs="projectDevs"
-          :project-testers="projectTesters"
-          :is-manager="isManager"
-          :own-tasks="filters.own_tasks"/>
-        </div>
-
-        <data-table
-        v-model="selectedTask"
-        @table:select-row="handleRowSelect"
-        :header="taskHeader"
-        :body="tasks"
-        :has-radio="isManager === true || filters.own_tasks"
-        class="task-list__table"/>
-
-      </template>
-
-      <template v-if="selectedTab === 2">
-
-        <div class="task-list__instruction">
-          Выберите комментарий из списка, чтобы заполнить поля.
-        </div>
-
-        <div class="task-list__controls">
-
-          <template v-if="isManager === true">
-            <field-checkbox
-            v-model="filters.own_comments"
-            :data="['Свои комментарии']"
-            label="Свои комментарии"
-            class="task-list__checkbox"/>
-          </template>
-
-          <field-textarea
-          v-model="commentText"
-          :title="'Текст комментария'"
-          :data-vv-as="'Текст комментария'"
-          :disabled="!selectedComment"
-          name="commentText"
-          class="task-list__textarea"/>
-
-          <button
-          v-if="!isManager || (isManager === true && filters.own_comments === true)"
-          @click="editComment"
-          v-text="'Редактировать'"
-          class="button button--positive"/>
-
-          <button
-          @click="deleteComment"
-          v-text="'Удалить'"
-          class="button button--negative"/>
-
-          <a
-          v-if="isManager === true"
-          :href="`${baseUrl}/home/comments/export`"
-          target="_blank"
-          download="comments.csv"
-          v-text="'Экспорт'"
-          class="button button--neutral"/>
-        </div>
-
-        <data-table
-        v-model="selectedComment"
-        :header="commentsHeader"
-        :body="comments"
-        has-radio
-        class="task-list__table"/>
-
-      </template>
-
-      <template v-if="selectedTab === 3">
-
+    <div class="task-list">
         <div class="task-list__content">
 
-          <div class="task-list__instruction">
-            Выберите сотрудника из списка, чтобы получить статистику.
-          </div>
+            <tabs
+            v-model="selectedTab"
+            :data="tabs"
+            value-name="tab_id"
+            label-name="tab_title"
+            class="task-list__tabs"/>
 
-        <div class="task-list__controls">
-          <field-checkbox
-          v-model="onlyEmpStats"
-          :data="['Задачи сотрудника']"
-          label="Задачи сотрудника"
-          class="task-list__checkbox"/>
+            <template v-if="selectedTab === 1">
 
-          <field-dropdown
-          v-model="selectedEmpStat"
-          :data="employees"
-          :disabled="!onlyEmpStats"
-          valueName="emp_id"
-          labelName="emp_fio"
-          placeholder="Сотрудник"
-          class="task-form__dropdown"/>
+                <div class="task-list__controls-container">
 
-          <a
-          v-if="isManager === true"
-          :href="`${baseUrl}/home/tasks/statistics/export`"
-          target="_blank"
-          download="statistics.csv"
-          v-text="'Экспорт'"
-          class="button button--neutral"/>
+                    <template v-if="!isManager && isDevOrTester">
+                        <field-checkbox
+                        v-model="filters.own_tasks"
+                        :data="['Свои задачи']"
+                        label="Свои задачи"
+                        class="task-list__checkbox"/>
+                    </template>
+
+                    <task-form
+                    @task-form:edit="editTask"
+                    @task-form:create="createTask"
+                    @task-form:delete="deleteTask"
+                    @task-form:reset="selectedTask = null"
+                    @task-form:project="getProjectEmployees"
+                    :task="selectedTask"
+                    :projects="projects"
+                    :statuses="statuses"
+                    :employees="propsData.employees"
+                    :project-devs="projectDevs"
+                    :project-testers="projectTesters"
+                    :is-manager="isManager"
+                    :own-tasks="filters.own_tasks"/>
+                </div>
+
+                <data-table
+                v-model="selectedTask"
+                @table:select-row="handleRowSelect"
+                :header="taskHeader"
+                :body="tasks"
+                :has-radio="isManager === true || filters.own_tasks"
+                :is-loading="isLoading"
+                class="task-list__table x x "/>
+
+            </template>
+
+            <template v-if="selectedTab === 2">
+
+                <div class="task-list__instruction">
+                    Выберите комментарий из списка, чтобы заполнить поля.
+                </div>
+
+                <div class="task-list__controls">
+
+                    <template v-if="isManager === true">
+                        <field-checkbox
+                        v-model="filters.own_comments"
+                        :data="['Собственные комментарии']"
+                        label="Собственные комментарии"
+                        class="task-list__checkbox"/>
+                    </template>
+
+                    <field-textarea
+                    v-model="commentText"
+                    :title="'Текст комментария'"
+                    :data-vv-as="'Текст комментария'"
+                    :disabled="!selectedComment"
+                    name="commentText"
+                    class="task-list__textarea"/>
+
+                    <button
+                    v-if="!isManager || (isManager === true && filters.own_comments === true)"
+                    @click="editComment"
+                    v-text="'Редактировать'"
+                    class="button button--positive"/>
+
+                    <button
+                    @click="deleteComment"
+                    v-text="'Удалить'"
+                    class="button button--negative"/>
+
+                    <a
+                    v-if="isManager === true"
+                    :href="`${baseUrl}/home/comments/export`"
+                    target="_blank"
+                    download="comments.csv"
+                    v-text="'Экспорт'"
+                    class="button button--neutral"/>
+                </div>
+
+                <data-table
+                v-model="selectedComment"
+                :header="commentsHeader"
+                :body="comments"
+                :is-loading="isLoading"
+                has-radio
+                class="task-list__table"/>
+
+            </template>
+
+            <template v-if="selectedTab === 3">
+
+                <div class="task-list__content">
+
+                    <div class="task-list__instruction">
+                        Выберите сотрудника из списка, чтобы получить статистику сотрудника.
+                    </div>
+
+                    <div class="task-list__controls">
+                        <field-checkbox
+                        v-model="onlyEmpStats"
+                        :data="['Задачи сотрудника']"
+                        label="Задачи сотрудника"
+                        class="task-list__checkbox"/>
+
+                        <field-dropdown
+                        v-model="selectedEmpStat"
+                        :data="employees"
+                        :disabled="!onlyEmpStats"
+                        valueName="emp_id"
+                        labelName="emp_fio"
+                        placeholder="Сотрудник"
+                        class="task-form__dropdown"/>
+
+                        <a
+                        v-if="isManager === true"
+                        :href="`${baseUrl}/home/tasks/statistics/export`"
+                        target="_blank"
+                        download="statistics.csv"
+                        v-text="'Экспорт'"
+                        class="button button--neutral"/>
+                    </div>
+
+                    <data-table
+                    :header="statisticsHeader"
+                    :body="statistics"
+                    :is-loading="isLoading"
+                    class="task-list__table"/>
+                </div>
+
+            </template>
+
+            <pagination
+            :selected="filters.page"
+            @page:select="handlePageSelect"
+            :size="tasksCnt"/>
         </div>
 
-          <data-table
-          :header="statisticsHeader"
-          :body="statistics"
-          class="task-list__table"/>
-        </div>
+        <modal
+        v-if="isModalShown"
+        :title="'Задача'"
+        @modal:close="closeModal"
+        class-list="task-list__modal">
+            <task
+            @comment:create="handleCreateComment"
+            :task="modalTask"
+            :header="taskHeader"
+            :comments="taskComments"
+            :comments-header="commentsHeader"
+            :is-loading="isLoading"/>
+        </modal>
 
-      </template>
     </div>
-
-    <modal
-    v-if="isModalShown"
-    :title="'Задача'"
-    @modal:close="closeModal"
-    class-list="task-list__modal">
-      <task
-      @comment:create="handleCreateComment"
-      :task="modalTask"
-      :header="taskHeader"
-      :comments="taskComments"
-      :comments-header="commentsHeader"
-      :is-loading="isLoading"/>
-    </modal>
-
-  </div>
 </template>
 
 <script>
 
 import Tabs from './Tabs';
-import api from '../api/api'
+import api from '../api'
 import Task from './Task';
 import DataTable from './DataTable';
-import FieldCheckbox from './FieldCheckbox';
-import FieldDropdown from './FieldDropdown';
+import FieldCheckbox from './Fields/FieldCheckbox';
+import FieldDropdown from './Fields/FieldDropdown';
 import FieldTextarea from './FieldTextarea';
 import TaskForm from './TaskForm';
 
 export default {
-  name: "TaskList",
-  components: { FieldTextarea, Tabs, FieldCheckbox, Task, DataTable, FieldDropdown, TaskForm },
-  props: {
-    propsData: { type: Object, default: null },
-  },
-  data() {
-    return {
+    name: "TaskList",
+    components: { FieldTextarea, Tabs, FieldCheckbox, Task, DataTable, FieldDropdown, TaskForm },
+    props: {
+        propsData: { type: Object, default: null },
+    },
+    data() {
+        return {
 
-      statuses: [
-        'В тестировании', 'Необходимо сделать', 'В работе', 'Тех. долг', 'Выполнено'
-      ],
+            statuses: [
+                'В тестировании', 'Необходимо сделать', 'В работе', 'Тех. долг', 'Выполнено'
+            ],
 
-      commentsHeader: [
-        { label: 'Комментарий', field: 'comment_comment' },
-        { label: 'Имя', field: 'emp_name' },
-        { label: 'Фамилия', field: 'emp_surname' },
-      ],
+            commentsHeader: [
+                { label: 'Комментарий', field: 'comment_comment' },
+                { label: 'Имя', field: 'emp_name' },
+                { label: 'Фамилия', field: 'emp_surname' },
+            ],
 
-      statisticsHeader: [
-        { label: 'Тип', field: 'name' },
-        { label: 'Количество', field: 'cnt' },
-      ],
+            statisticsHeader: [
+                { label: 'Тип', field: 'name' },
+                { label: 'Количество', field: 'cnt' },
+            ],
 
-      tasks: this.propsData.tasks,
-      comments: this.propsData.comments,
-      employees: this.propsData.employees,
-      statistics: this.propsData.statistics,
-      projects: this.propsData.projects,
+            tasks: this.propsData.tasks,
+            comments: this.propsData.comments,
+            employees: this.propsData.employees,
+            statistics: this.propsData.statistics,
+            projects: this.propsData.projects,
 
-      isManager: this.propsData.isManager || false,
-      isDeveloper: this.propsData.isDeveloper || false,
-      isTester: this.propsData.isTester || false,
+            isManager: this.propsData.isManager || false,
+            isDeveloper: this.propsData.isDeveloper || false,
+            isTester: this.propsData.isTester || false,
 
-      filters: {
-        own_tasks: false,
-        own_comments: false,
-      },
+            filters: {
+                own_tasks: false,
+                own_comments: false,
+                per_page: 10,
+                page: 1,
+            },
 
-      taskDesc: null,
-      commentText: '',
+            taskDesc: null,
+            commentText: '',
 
-      isModalShown: false,
+            isModalShown: false,
 
-      modalTask: null,
+            modalTask: null,
 
-      selectedTask: null,
-      selectedComment: null,
-      selectedTab: 1,
-      selectedStatus: null,
-      selectedEmpStat: null,
+            selectedTask: null,
+            selectedComment: null,
+            selectedTab: 1,
+            selectedStatus: null,
+            selectedEmpStat: null,
 
-      taskComments: [],
-      projectDevs: [],
-      projectTesters: [],
+            taskComments: [],
+            projectDevs: [],
+            projectTesters: [],
 
-      onlyEmpStats: false,
-      isLoading: false,
+            onlyEmpStats: false,
+            isLoading: false,
 
-      baseUrl: window.location.origin,
-    }
-  },
-
-  methods: {
-
-    async handleRowSelect(row){
-      this.modalTask = row;
-      this.isModalShown = true;
-      const params = { task_id: row.task_id };
-
-      this.taskComments = await this.getComments(params);
+            baseUrl: window.location.origin,
+        }
     },
 
-    closeModal(){
-      this.modalTask = null;
-      this.isModalShown = false;
+    methods: {
+
+        async handleRowSelect(row){
+            this.modalTask = row;
+            this.isModalShown = true;
+            const params = { task_id: row.task_id };
+
+            this.taskComments = await this.getComments(params);
+        },
+
+        closeModal(){
+            this.modalTask = null;
+            this.isModalShown = false;
+        },
+
+        async deleteTask(taskId) {
+            if(!taskId) return;
+
+            const params = { task_id: taskId };
+            this.res = await api.post('/home/tasks/delete', params);
+
+            await this.getTasks();
+            this.closeModal();
+
+            this.$notify({
+                type: 'success',
+                text: 'Задача успешно удалена'
+            });
+        },
+
+        async editTask(taskObj) {
+            if(!taskObj || !taskObj.task_id) return;
+
+            await api.post('/home/tasks/edit', taskObj);
+
+            await this.getTasks();
+            this.closeModal();
+
+            this.$notify({
+                type: 'success',
+                text: 'Задача успешно отредактирована'
+            });
+        },
+
+        async createTask(taskObj = null) {
+            if(!taskObj) return;
+            await api.post('/home/tasks/create', taskObj);
+
+            await this.getTasks();
+            this.closeModal();
+
+            this.$notify({
+                type: 'success',
+                text: 'Задача успешно создана'
+            });
+        },
+
+        async getTasks() {
+            this.tasks = await api.post('/home/tasks', this.filters);
+            this.selectedTask = null;
+        },
+
+        async handleCreateComment(commentText){
+            const params = { task_id: this.modalTask.task_id, comment_text: commentText };
+            await api.post('/home/comments/create', params);
+
+            this.closeModal();
+            this.comments = await this.getComments(params);
+
+            this.$notify({
+                type: 'success',
+                text: 'Комментарий успешно создан'
+            });
+        },
+
+        async editComment() {
+            if(!this.selectedComment) return;
+            if(!this.commentText.length){
+                this.$notify({
+                    type: 'warn',
+                    text: 'Комментарий не может быть пустым'
+                });
+                return;
+            }
+            const params = { comment_id: this.selectedComment.comment_id,
+                comment_text: this.commentText || this.selectedComment.comment_comment };
+            this.res = await api.post('/home/comments/edit', params);
+
+            this.closeModal();
+            this.comments = await this.getComments();
+
+            this.$notify({
+                type: 'success',
+                text: 'Комментарий успешно отредактирован'
+            });
+        },
+
+        async deleteComment() {
+            if(!this.selectedComment) return;
+            const params = { comment_id: this.selectedComment.comment_id };
+            this.res = await api.post('/home/comments/delete', params);
+
+            this.closeModal();
+            this.comments = await this.getComments();
+
+            this.$notify({
+                type: 'success',
+                text: 'Комментарий успешно удален'
+            });
+        },
+
+        async getComments(params) {
+            if(!params) {
+                const ownComments = this.isManager === true ? this.filters.own_comments : true;
+                params = { own_comments: ownComments }
+            }
+            this.isLoading = true;
+            const res = await api.post('/home/comments', params);
+            this.isLoading = false;
+
+            this.selectedComment = null;
+            return res;
+        },
+
+        async getTaskStatistics() {
+            this.isLoading = true;
+            const params = {
+                only_emp_stats: this.onlyEmpStats,
+                emp_id: this.selectedEmpStat,
+            };
+            this.statistics = await api.post('/home/tasks/statistics', params);
+            this.isLoading = false;
+        },
+
+        async getProjectEmployees(projectId) {
+            const taskProject = this.selectedTask ? this.selectedTask.task_project : projectId;
+
+            if(!taskProject) return;
+
+            const params = { task_project: taskProject}
+            const employees = await api.post('/home/employees/by_project', params);
+            this.projectDevs = employees.devs;
+            this.projectTesters = employees.testers;
+        },
+
+        handlePageSelect(page){
+            this.filters.page = page;
+        }
     },
 
-    async deleteTask(taskId) {
-      if(!taskId) return;
-      const params = { task_id: taskId };
-      this.res = await api.post('/home/tasks/delete', params);
+    computed: {
+        isDevOrTester() {
+            return this.isDeveloper || this.isTester;
+        },
 
-      await this.getTasks();
-      this.closeModal();
+        tabs() {
+            return this.isManager === true ?
+            [{ 'tab_id': 1, 'tab_title': 'Задачи' },
+                { 'tab_id': 2, 'tab_title': 'Комментарии' },
+                { 'tab_id': 3, 'tab_title': 'Статистика' }] :
 
-      this.$notify({
-        type: 'success',
-        text: 'Задача успешно удалена'
-      });
+            [{ 'tab_id': 1, 'tab_title': 'Задачи' },
+                { 'tab_id': 2, 'tab_title': 'Комментарии' }]
+        },
+
+        taskHeader() {
+            return this.filters.own_tasks === true ?
+            [
+                { label: 'Заголовок', field: 'task_title' },
+                { label: 'Описание', field: 'task_desc' },
+                { label: 'Приоритет', field: 'task_priority' },
+                { label: 'Статус', field: 'task_status' },
+                { label: 'Проект', field: 'project_title' },
+                { label: 'Роль', field: 'ref_task_emp_role' },
+                { label: 'Дата создания', field: 'task_created' },
+                { label: 'Срок исполнения', field: 'task_deadline' },
+            ] :
+            [
+                { label: 'Заголовок', field: 'task_title' },
+                { label: 'Описание', field: 'task_desc' },
+                { label: 'Приоритет', field: 'task_priority' },
+                { label: 'Статус', field: 'task_status' },
+                { label: 'Проект', field: 'project_title' },
+                { label: 'Дата создания', field: 'task_created' },
+                { label: 'Срок исполнения', field: 'task_deadline' },
+            ];
+        },
+
+        tasksCnt(){
+            const count = this.tasks.length ? this.tasks[0].tasks_cnt : 0;
+            console.log(count / this.filters.per_page);
+            console.log(Math.floor(count / this.filters.per_page));
+            return Math.floor(count / this.filters.per_page);
+        },
+
+        commentsCnt(){
+            const count = this.comments.length ? this.comments[0].commentsCnt : 0;
+            return Math.floor(count / this.filters.per_page);
+        }
     },
 
-    async editTask(taskObj) {
-      if(!taskObj || !taskObj.task_id) return;
+    watch: {
+        filters: {
+            deep: true,
+            async handler() {
+                this.comments = await this.getComments();
+                await this.getTasks();
+            }
+        },
 
-      await api.post('/home/tasks/edit', taskObj);
+        selectedTask: {
+            handler(){
+                this.selectedStatus = this.selectedTask ? this.selectedTask.task_status : null;
+                this.taskDesc = this.selectedTask ? this.selectedTask.task_desc : null;
+                this.getProjectEmployees();
+            }
+        },
 
-      await this.getTasks();
-      this.closeModal();
+        selectedComment: {
+            handler(){
+                this.commentText = this.selectedComment ? this.selectedComment.comment_comment : null;
+            }
+        },
 
-      this.$notify({
-        type: 'success',
-        text: 'Задача успешно отредактирована'
-      });
+        onlyEmpStats: {
+            handler(){
+                this.selectedEmpStat = null;
+            }
+        },
+
+        selectedEmpStat: {
+            handler(){
+                this.getTaskStatistics();
+            }
+        },
     },
-
-    async createTask(taskObj = null) {
-      if(!taskObj) return;
-      await api.post('/home/tasks/create', taskObj);
-
-      await this.getTasks();
-      this.closeModal();
-
-      this.$notify({
-        type: 'success',
-        text: 'Задача успешно создана'
-      });
-    },
-
-
-    async getTasks() {
-      this.tasks = await api.post('/home/tasks', this.filters);
-      this.selectedTask = null;
-    },
-
-    async handleCreateComment(commentText){
-      const params = { task_id: this.modalTask.task_id, comment_text: commentText };
-      await api.post('/home/comments/create', params);
-
-      this.closeModal();
-      this.comments = await this.getComments(params);
-
-      this.$notify({
-        type: 'success',
-        text: 'Комментарий успешно создан'
-      });
-    },
-
-    async editComment() {
-      if(!this.selectedComment) return;
-      if(!this.commentText.length){
-        this.$notify({
-          type: 'warn',
-          text: 'Комментарий не может быть пустым'
-        });
-        return;
-      }
-      const params = { comment_id: this.selectedComment.comment_id,
-        comment_text: this.commentText || this.selectedComment.comment_comment };
-      this.res = await api.post('/home/comments/edit', params);
-
-      this.closeModal();
-      this.comments = await this.getComments();
-
-      this.$notify({
-        type: 'success',
-        text: 'Комментарий успешно отредактирован'
-      });
-    },
-
-    async deleteComment() {
-      if(!this.selectedComment) return;
-      const params = { comment_id: this.selectedComment.comment_id };
-      this.res = await api.post('/home/comments/delete', params);
-
-      this.closeModal();
-      this.comments = await this.getComments();
-
-      this.$notify({
-        type: 'success',
-        text: 'Комментарий успешно удален'
-      });
-    },
-
-    async getComments(params){
-      if(!params) {
-        const ownComments = this.isManager === true ? this.filters.own_comments : true;
-        params = { own_comments: ownComments }
-      }
-      this.isLoading = true;
-      const res = await api.post('/home/comments', params);
-      this.isLoading = false;
-
-      this.selectedComment = null;
-      return res;
-    },
-
-    async getTaskStatistics(){
-      this.isLoading = true;
-      const params = {
-        only_emp_stats: this.onlyEmpStats,
-        emp_id: this.selectedEmpStat,
-      };
-      this.statistics = await api.post('/home/tasks/statistics', params);
-      this.isLoading = false;
-    },
-
-    async getProjectEmployees(projectId){
-      const taskProject = this.selectedTask ? this.selectedTask.task_project : projectId;
-
-      if(!taskProject) return;
-
-      const params = { task_project: taskProject}
-      const employees = await api.post('/home/employees/by_project', params);
-      this.projectDevs = employees.devs;
-      this.projectTesters = employees.testers;
-    }
-  },
-
-  computed: {
-    isDevOrTester(){
-      return this.isDeveloper || this.isTester;
-    },
-
-    tabs(){
-      return this.isManager === true ?
-      [{ 'tab_id': 1, 'tab_title': 'Задачи' },
-        { 'tab_id': 2, 'tab_title': 'Комментарии' },
-        { 'tab_id': 3, 'tab_title': 'Статистика' }] :
-
-      [{ 'tab_id': 1, 'tab_title': 'Задачи' },
-        { 'tab_id': 2, 'tab_title': 'Комментарии' }]
-    }
-    ,
-
-    taskHeader(){
-      return this.filters.own_tasks === true ?
-      [
-        { label: 'Заголовок', field: 'task_title' },
-        { label: 'Описание', field: 'task_desc' },
-        { label: 'Приоритет', field: 'task_priority' },
-        { label: 'Статус', field: 'task_status' },
-        { label: 'Проект', field: 'project_title' },
-        { label: 'Роль', field: 'ref_task_emp_role' },
-        { label: 'Дата создания', field: 'task_created' },
-        { label: 'Срок исполнения', field: 'task_deadline' },
-      ] :
-      [
-        { label: 'Заголовок', field: 'task_title' },
-        { label: 'Описание', field: 'task_desc' },
-        { label: 'Приоритет', field: 'task_priority' },
-        { label: 'Статус', field: 'task_status' },
-        { label: 'Проект', field: 'project_title' },
-        { label: 'Дата создания', field: 'task_created' },
-        { label: 'Срок исполнения', field: 'task_deadline' },
-      ];
-    },
-
-  },
-
-  watch: {
-    filters: {
-      deep: true,
-      async handler() {
-        this.comments = await this.getComments();
-        await this.getTasks();
-      }
-    },
-
-    selectedTask: {
-      handler(){
-        this.selectedStatus = this.selectedTask ? this.selectedTask.task_status : null;
-        this.taskDesc = this.selectedTask ? this.selectedTask.task_desc : null;
-        this.getProjectEmployees();
-      }
-    },
-
-    selectedComment: {
-      handler(){
-        this.commentText = this.selectedComment ? this.selectedComment.comment_comment : null;
-      }
-    },
-
-    onlyEmpStats: {
-      handler(){
-        this.selectedEmpStat = null;
-      }
-    },
-
-    selectedEmpStat: {
-      handler(){
-        this.getTaskStatistics();
-      }
-    }
-  },
 }
 </script>
 
@@ -462,27 +486,27 @@ export default {
 
 .task-list {
 
-  &__content {
-    > * + * {
-      margin-top: 20px;
+    &__content {
+        > * + * {
+            margin-top: 20px;
+        }
     }
-  }
 
-  &__controls-container {
-    align-items: flex-end;
-  }
+    &__controls-container {
+        align-items: flex-end;
+    }
 
-  &__controls {
-    display: grid;
-    grid-template-columns: repeat(3, 250px);
-    grid-gap: 20px;
-    align-items: flex-end;
-  }
+    &__controls {
+        display: grid;
+        grid-template-columns: repeat(3, 250px);
+        grid-gap: 20px;
+        align-items: flex-end;
+    }
 
-  &__checkbox {
-    min-width: unset;
-    max-width: unset;
-  }
+    &__checkbox {
+        min-width: unset;
+        max-width: unset;
+    }
 
 }
 

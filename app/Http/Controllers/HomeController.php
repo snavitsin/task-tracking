@@ -94,7 +94,7 @@ class HomeController extends Controller
     public function getTasks(Request $request){
         $params = $request->post('params');
         $ownTasks = $params['own_tasks'];
-        $this->model = new HomeModel(['emp_id' => Auth::user()->emp_id]);
+        $this->model = new HomeModel(array_merge(['emp_id' => Auth::user()->emp_id], $params));
         $tasks = $this->model->getTasks($ownTasks);
 
         return response($tasks);
@@ -114,8 +114,10 @@ class HomeController extends Controller
 
         $this->model = new HomeModel($params);
 
-        $developers = $this->model->getProjectEmployees('Разработчик');
-        $testers = $this->model->getProjectEmployees('Тестировщик');
+        $empPositions = $this->model->empPositions;
+
+        $developers = $this->model->getProjectEmployees($empPositions['developer']);
+        $testers = $this->model->getProjectEmployees($empPositions['developer']);
 
         $employees = ['devs' => $developers, 'testers' => $testers];
 

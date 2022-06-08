@@ -28,8 +28,6 @@
                         @endrole
 
                         @role('developer')
-{{--                        {{$user = App\Models\User::find(10)}}--}}
-{{--                        {{dd($user->hasPermissionTo('operate-own-task'))}}--}}
                         <task-list
                                 :props-data="{{ json_encode(['tasks' => $tasks,
                                  'comments' => $comments,
@@ -39,8 +37,6 @@
                         @endrole
 
                         @role('tester')
-                        {{--                        {{$user = App\Models\User::find(10)}}--}}
-                        {{--                        {{dd($user->hasPermissionTo('operate-own-task'))}}--}}
                         <task-list :props-data="{{ json_encode(['tasks' => $tasks,
                          'comments' => $comments,
                           'employees' => $employees,
@@ -49,8 +45,6 @@
                         @endrole
 
                         @role('employee')
-                        {{--                        {{$user = App\Models\User::find(10)}}--}}
-                        {{--                        {{dd($user->hasPermissionTo('operate-own-task'))}}--}}
                         <task-list :props-data="{{ json_encode(['tasks' => $tasks,
                          'comments' => $comments,
                           'employees' => $employees,

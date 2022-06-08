@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        \Illuminate\Support\Facades\Auth::provider('CustomUserProvider', function($app, array $config) {
+            return new CustomUserProvider($app['hash'], $config['model']);
+        });
     }
 }

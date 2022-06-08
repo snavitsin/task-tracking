@@ -18,9 +18,10 @@
       <field-textarea
       v-model="commentText"
       :title="'Текст комментария'"
+      :placeholder="'Введите текст комментария'"
       :data-vv-as="'Текст комментария'"
       name="commentText"
-      class="task-list__textarea"/>
+      class="task__textarea"/>
 
       <button
       @click="createTask"
@@ -82,6 +83,10 @@ export default {
     width: auto;
     min-width: 250px;
     max-width: 600px;
+  }
+
+  &__textarea {
+    min-width: 600px;
   }
 
 }

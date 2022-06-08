@@ -139,7 +139,7 @@ export default {
   --field-dropdown-computed-caret-padding: calc((var(--field-dropdown-computed-height) - 20px) / 2); //20px: width (ширина иконки)
 
 
-  --field-dropdown-computed-accent-color: #168e47;
+  --field-dropdown-computed-accent-color: #906fe9;
 
   .multiselect {
     display: block;

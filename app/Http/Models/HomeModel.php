@@ -12,6 +12,14 @@ class HomeModel extends Model
     use HasFactory;
 
     public $timestamps = false;
+    public $perPage = 10;
+    public $page = 1;
+
+    public const empPositions = [
+        'tester' => 1,
+        'developer' => 2,
+        'manager' => 3,
+    ];
 
     //public $emp_id = null;
 
@@ -33,7 +41,9 @@ class HomeModel extends Model
         'comment_text',
         'only_emp_stats',
         'task_dev',
-        'task_tester'
+        'task_tester',
+        'per_page',
+        'page'
     ];
 
     public function __construct($values = [])
@@ -64,20 +74,20 @@ class HomeModel extends Model
         $dev = DB::table('Ref_task_emp')
             ->where([
                 ['ref_task_emp_task', '=', $taskId],
-                ['ref_task_emp_role', '=', 'Разработчик'],
+                ['ref_task_emp_role', '=', self::empPositions['developer']],
             ])->get();
 
         if(count($dev)){
             DB::table('Ref_task_emp')
                 ->where([
                     ['ref_task_emp_task', '=', $taskId],
-                    ['ref_task_emp_role', '=', 'Разработчик'],
+                    ['ref_task_emp_role', '=', self::empPositions['developer']],
                 ])->update(['ref_task_emp_emp' => $taskDev]);
         } else {
             DB::table('Ref_task_emp')
                 ->insert([
                     'ref_task_emp_task' => $taskId,
-                    'ref_task_emp_role' => 'Разработчик',
+                    'ref_task_emp_role' => self::empPositions['developer'],
                     'ref_task_emp_emp' => $taskDev,
                     ]);
         }
@@ -86,20 +96,20 @@ class HomeModel extends Model
         $tester = DB::table('Ref_task_emp')
             ->where([
                 ['ref_task_emp_task', '=', $taskId],
-                ['ref_task_emp_role', '=', 'Тестировщик'],
+                ['ref_task_emp_role', '=', self::empPositions['tester']],
             ])->get();
 
         if(count($tester)){
             DB::table('Ref_task_emp')
                 ->where([
                     ['ref_task_emp_task', '=', $taskId],
-                    ['ref_task_emp_role', '=', 'Тестировщик'],
+                    ['ref_task_emp_role', '=', self::empPositions['tester']],
                 ])->update(['ref_task_emp_emp' => $taskTester]);
         } else {
             DB::table('Ref_task_emp')
                 ->insert([
                     'ref_task_emp_task' => $taskId,
-                    'ref_task_emp_role' => 'Тестировщик',
+                    'ref_task_emp_role' => self::empPositions['tester'],
                     'ref_task_emp_emp' => $taskTester,
                 ]);
         }
@@ -142,14 +152,14 @@ class HomeModel extends Model
         DB::table('Ref_task_emp')
             ->insert([
                 'ref_task_emp_task' => $taskId,
-                'ref_task_emp_role' => 'Разработчик',
+                'ref_task_emp_role' => self::empPositions['developer'],
                 'ref_task_emp_emp' => $this->attributes['task_dev'],
             ]);
 
         DB::table('Ref_task_emp')
             ->insert([
                 'ref_task_emp_task' => $taskId,
-                'ref_task_emp_role' => 'Тестировщик',
+                'ref_task_emp_role' => self::empPositions['tester'],
                 'ref_task_emp_emp' => $this->attributes['task_tester'],
             ]);
     }
@@ -199,12 +209,15 @@ class HomeModel extends Model
     public function getTasks($ownTasks = false)
     {
         $empId = $this->attributes['emp_id'];
-        $sql = $ownTasks ? "select * from get_tasks_by_emp($empId)" : "select * from  get_tasks()";
-        $tasks =  DB::select($sql);
+        $perPage = $this->attributes['per_page'] ?? $this->perPage;
+        $page = $this->attributes['page'] ?? $this->page;
+
+        $sql = $ownTasks ? "select * from get_tasks_by_emp($empId, $perPage, $page)" : "select * from  get_tasks($perPage, $page)";
+        $tasks = DB::select($sql);
 
         foreach ($tasks as $task){
-            $task->task_dev = $this->getTaskOperators($task->task_id, 'Разработчик');
-            $task->task_tester = $this->getTaskOperators($task->task_id, 'Тестировщик');
+            $task->task_dev = $this->getTaskOperators($task->task_id, self::empPositions['developer']);
+            $task->task_tester = $this->getTaskOperators($task->task_id, self::empPositions['tester']);
         }
 
         return $tasks;
@@ -212,7 +225,7 @@ class HomeModel extends Model
 
     public function getTaskOperators($taskId, $operator)
     {
-        $employee = DB::select("select * from get_task_operator($taskId, '$operator')");
+        $employee = DB::select("select * from get_task_operator($taskId, $operator)");
         if (!$employee) return null;
 
         $employee = array_shift($employee);
@@ -230,7 +243,7 @@ class HomeModel extends Model
 
     public function getEmployees(){
         $employees = DB::table('Employees')->select(['emp_id', 'emp_name', 'emp_surname', 'emp_patroname'])->get();
-        foreach ($employees as &$employee){
+        foreach ($employees as $employee){
             $employee->emp_fio = "$employee->emp_surname $employee->emp_name $employee->emp_patroname";
         }
         return $employees;

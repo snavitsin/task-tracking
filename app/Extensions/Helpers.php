@@ -33,4 +33,11 @@ class Helpers
         $str = $lcfirst ? lcfirst($str) : $str;
         return $str;
     }
+
+    public static function toLowerCase($arr) {
+        return array_map(function($item) {
+            $item = (array) $item;
+            return array_change_key_case($item, CASE_LOWER);
+        }, $arr);
+    }
 }
