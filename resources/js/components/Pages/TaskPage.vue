@@ -358,8 +358,7 @@ export default {
     },
     taskAuthor() {
       const author = this.taskEmps.find(emp => emp.emp_position == 3);
-      console.log(author);
-      return author.emp_fio;
+      return author ? author.emp_fio : null;
     }
   },
   created() {
