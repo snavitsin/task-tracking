@@ -30,6 +30,8 @@ Vue.component('main-page', require('./components/MainPage.vue').default);
 Vue.component('login-page', require('./components/Pages/LoginPage.vue').default);
 Vue.component('error-page', require('./components/Pages/ErrorPage.vue').default);
 Vue.component('task-page', require('./components/Pages/TaskPage.vue').default);
+Vue.component('subdivisions-page', require('./components/Pages/SubdivisionsPage.vue').default);
+Vue.component('subdivision-page', require('./components/Pages/SubdivisionPage.vue').default);
 Vue.component('app', require('./components/App.vue').default);
 
 Vue.component('modal', require('./components/Modal.vue').default);

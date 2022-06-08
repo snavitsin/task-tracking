@@ -86,10 +86,10 @@ class TaskModel extends Model
     public function getTaskEmployees()
     {
         $taskId = $this->attributes['task_id'];
-        $emps = DB::table('employees as EMPS')->join('ref_task_emp as RTE', function($join) use ($taskId) {
-            $join->on('EMPS.emp_id', '=', 'RTE.ref_task_emp_emp')
-                ->where('RTE.ref_task_emp_task', $taskId);
-        })->select()->get()->all();
+        $emps = User::select('employees.*')
+            ->join('ref_task_emp as RTE', function ($join) use ($taskId) {
+                $join->on('employees.emp_id', '=', 'RTE.ref_task_emp_emp')->where('RTE.ref_task_emp_task', $taskId);
+            })->get()->all();
         return array_values($emps);
     }
 

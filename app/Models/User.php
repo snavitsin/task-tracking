@@ -59,7 +59,7 @@ class User extends Authenticatable
         'emp_remember_token'
     ];
 
-    protected $appends = ['emp_fio'];
+    protected $appends = ['emp_fio', 'emp_position_title'];
 
     protected $testerId = 1;
     protected $developerId = 2;
@@ -85,17 +85,11 @@ class User extends Authenticatable
         if (!Auth::check())
             return null;
 
-        $user = Auth::user();
-        $attributes = $user->attributes;
-        $hidden = $user->hidden;
-
-        $attributes = array_filter($attributes, function($key) use ($hidden) {
-            return array_search($key, $hidden) === false;
-        },ARRAY_FILTER_USE_KEY);
-
+        $id = Auth::user()->getUserId();
+        $user = User::find($id);
         $roles = $user->roles()->get()->toArray();
-        $attributes['user_roles'] = $roles;
-        return array_change_key_case($attributes, CASE_LOWER);
+        $user->attributes['user_roles'] = $roles;
+        return $user;
     }
 
     public function getUserId() {
@@ -104,18 +98,18 @@ class User extends Authenticatable
 
     public static function getEmployeesByRole($position) {
         $employees = User::where('emp_position', $position)->get()->all();
-//        foreach ($employees as &$employee) {
-//            $employee->attributes['emp_fio'] = User::getEmpFio($employee->attributes);
-//        }
         return array_values($employees);
-    }
-
-    public static function getEmpFio($attributes) {
-        return $attributes['emp_surname'].' '.$attributes['emp_name'].' '.$attributes['emp_surname'];
     }
 
     public function getEmpFioAttribute(){
         return $this->attributes['emp_surname'].' '.$this->attributes['emp_name'].' '.$this->attributes['emp_patroname'];
-        //return 'abcd';
+    }
+
+    public function getEmpPositionTitleAttribute(){
+        $positions = [
+            1 => 'Тестировщик',
+            2 => 'Разработчик',
+            3 => 'Руководитель'];
+        return $positions[$this->attributes['emp_position']];
     }
 }

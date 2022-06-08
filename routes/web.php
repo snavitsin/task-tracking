@@ -20,6 +20,20 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/', [App\Http\Controllers\MainController::class, 'getMainPage'])->name('getMainPage');
     Route::post('logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
+    Route::group(['prefix' => 'subdivisions'], function ()
+    {
+        Route::get('/', [App\Http\Controllers\SubdivisionsController::class, 'getSubdivisionsPage']);
+        Route::get('{id}', [App\Http\Controllers\SubdivisionsController::class, 'getSubdivisionPage']);
+        Route::post('save', [App\Http\Controllers\SubdivisionsController::class, 'updateSubdiv']);
+    });
+
+    Route::group(['prefix' => 'projects'], function ()
+    {
+        Route::get('/', [App\Http\Controllers\ProjectsController::class, 'getProjectsPage']);
+        Route::get('{id}', [App\Http\Controllers\TasksController::class, 'getTaskPage']);
+        Route::post('update', [App\Http\Controllers\TasksController::class, 'updateTaskStatus']);
+    });
+
     Route::group(['prefix' => 'tasks'], function () {
         Route::get('create', [App\Http\Controllers\TasksController::class, 'newTaskPage']);
         Route::get('all', [App\Http\Controllers\MainController::class, 'getTasksPage'])->name('getTasksPage');

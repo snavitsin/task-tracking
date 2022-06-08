@@ -66,6 +66,7 @@ export default {
   }
 
   &__footer {
+    margin-top: 50px;
     flex: 0 0 auto;
   }
 }

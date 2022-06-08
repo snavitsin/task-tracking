@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Extensions\Helpers;
+use App\Models\TaskModel;
 
 class CommentsModel extends Model
 {
@@ -42,6 +43,8 @@ class CommentsModel extends Model
         'comment_comment',
         'task_id',
     ];
+
+    protected $appends = ['comment_author', 'comment_task_title'];
 
     public function __construct($values = [])
     {
@@ -83,5 +86,17 @@ class CommentsModel extends Model
             $result = $task->save();
         }
         return $result;
+    }
+
+    public function getCommentAuthorAttribute(){
+        $userId = $this->attributes['comment_emp'];
+        $user = User::find($userId)->first();
+        return $user->getEmpFioAttribute();
+    }
+
+    public function getCommentTaskTitleAttribute(){
+        $taskId = $this->attributes['comment_task'];
+        $task = TaskModel::find($taskId);
+        return $task->attributes['task_title'];
     }
 }

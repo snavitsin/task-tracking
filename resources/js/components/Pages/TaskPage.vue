@@ -7,6 +7,7 @@
             <field-container
             :is-required="true"
             :errors="veeErrors.collect('task_title')"
+            title="Заголовок"
             class="task-page__field task-page__title">
               <field-input
               v-model="taskData.task_title"
@@ -21,6 +22,7 @@
             <field-container
             :is-required="true"
             :errors="veeErrors.collect('task_priority')"
+            title="Приоритет"
             class="task-page__field">
               <field-dropdown
               class="task-page__dropdown"
@@ -36,6 +38,7 @@
             <field-container
             :is-required="true"
             :errors="veeErrors.collect('task_status')"
+            title="Статус"
             class="task-page__field">
               <field-dropdown
               class="task-page__dropdown"
@@ -62,7 +65,7 @@
           class="button button--neutral task-page__control"/>
           <button
           v-if="!isNewTask && isManager"
-          @click="deleteTask"
+          @click="isConfirmModalShown = true"
           v-text="'Удалить'"
           class="button button--negative task-page__control"/>
         </div>
@@ -70,6 +73,7 @@
           <field-container
           :is-required="true"
           :errors="veeErrors.collect('task_desc')"
+          title="Описание"
           class="report-answer-quality__field">
             <field-textarea
             v-model="taskData.task_desc"
@@ -82,12 +86,31 @@
             class="task-page__textarea"/>
           </field-container>
         </div>
+        <div
+        v-if="comments.length"
+        class="task-page__comments">
+          <div
+          v-text="'Комментарии'"
+          class="task-page__comments-title" />
+          <div
+          v-for="comment in comments"
+          :key="comment.comment_id"
+          class="task-page__comment">
+            <div
+            v-text="comment.comment_author"
+            class="task-page__comment-author" />
+            <div
+            v-text="comment.comment_comment"
+            class="task-page__comment-text" />
+          </div>
+        </div>
       </div>
 
       <div class="task-page__side">
         <field-container
         :is-required="true"
         :errors="veeErrors.collect('task_project')"
+        title="Проект"
         class="task-page__field">
           <field-dropdown
           class="task-page__dropdown"
@@ -101,17 +124,20 @@
         </field-container>
 
         <div class="task-page__operators">
-          <div class="task-page__operator">
-            <div
-            v-text="'Автор'"
-            class="task-page__operator-title" />
-            <div
-            v-text="'Арсен Иванович Иванов'"
-            class="task-page__operator-user" />
-          </div>
+          <field-container
+          title="Автор задачи"
+          class="task-page__field task-page__title">
+            <field-input
+            v-model="taskAuthor"
+            :data-vv-as="' '"
+            readonly
+            name="task_title" />
+          </field-container>
+
           <field-container
           :is-required="true"
           :errors="veeErrors.collect('task_dev')"
+          title="Разработчик"
           class="task-page__field">
             <field-dropdown
             class="task-page__dropdown"
@@ -127,6 +153,7 @@
           <field-container
           :is-required="true"
           :errors="veeErrors.collect('task_tester')"
+          title="Тестировщик"
           class="task-page__field">
             <field-dropdown
             class="task-page__dropdown"
@@ -142,20 +169,23 @@
         <div class="task-page__info">
 
           <field-container
-          :is-required="true"
+          v-if="!isNewTask"
           :errors="veeErrors.collect('task_created')"
+          title="Дата создания"
           class="task-page__field task-page__datepicker">
             <field-datepicker
             v-model="taskData.task_created"
             v-validate="'required'"
             :data-vv-as="'Дата создания'"
             formatter="dd.MM.yyyy"
-            :readonly="!isNewTask"/>
+            readonly
+            :disabled="true" />
           </field-container>
 
           <field-container
           :is-required="true"
           :errors="veeErrors.collect('task_deadline')"
+          title="Срок выполнения"
           class="task-page__field task-page__datepicker">
             <field-datepicker
             v-model="taskData.task_deadline"
@@ -180,13 +210,13 @@
       <template #buttons>
         <div class="task-page__modal-controls">
           <button
-          v-text="'Изменить статус'"
+          v-text="'Удалить'"
           @click="handleConfirmation()"
-          class="button button--positive task-page__button"/>
+          class="button button--negative task-page__button"/>
           <button
           v-text="'Отмена'"
           @click="handleCancel()"
-          class="button button--positive task-page__button"/>
+          class="button button--neutral task-page__button"/>
         </div>
       </template>
     </modal>
@@ -279,8 +309,30 @@ export default {
       this.$store.state.isLoading = false;
     },
 
-    deleteTask() {
+    async deleteTask() {
+      this.$store.state.isLoading = true;
+      const params = { task_id: this.taskData.task_id };
+      const res = await this.$store.dispatch('fetchData', { url: '/tasks/delete', params });
 
+      if(res?.errors) {
+        const self = this;
+        Object.keys(res.errors).forEach(function(key) {
+          self.$notify({
+            type: 'error',
+            text: res.errors[key].shift(),
+          });
+        });
+      } else {
+        this.$notify({
+          type: res.type,
+          text: res.message
+        });
+
+        if(res.status === true) {
+          //await this.getTasks();
+        }
+      }
+      this.$store.state.isLoading = false;
     },
 
     cancelChanges() {
@@ -288,7 +340,8 @@ export default {
     },
 
     handleConfirmation() {
-      this.updateTaskStatus(this.selectedTask.task_id, this.newStatus);
+      this.deleteTask();
+      this.isConfirmModalShown = false;
     },
     handleCancel() {
       this.mapTasks();
@@ -302,6 +355,11 @@ export default {
     },
     saveButtonText() {
       return this.isNewTask === true ? 'Создать' : 'Сохранить';
+    },
+    taskAuthor() {
+      const author = this.taskEmps.find(emp => emp.emp_position == 3);
+      console.log(author);
+      return author.emp_fio;
     }
   },
   created() {
@@ -335,12 +393,7 @@ export default {
   }
 
   &__title {
-
     --input-height: 60px;
-
-    font-size: 24px;
-    font-weight: bold;
-    color: var(--accent-color);
   }
 
   &__controls {
@@ -494,10 +547,7 @@ export default {
 
     &-controls {
       display: flex;
-      flex-wrap: wrap;
-      margin-left: -10px;
-      margin-right: -10px;
-      margin-top: 10px;
+      justify-content: space-between;
 
       @media (max-width: 480px) {
         flex-wrap: wrap;
@@ -515,6 +565,22 @@ export default {
     flex: 1 1 auto;
     margin: 10px;
     min-width: 200px;
+  }
+
+  &__comments {
+    &-title {
+      font-weight: bold;
+    }
+
+    > * + * {
+      margin-top: 10px;
+    }
+  }
+
+  &__comment {
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #D3D8DB;
   }
 }
 </style>

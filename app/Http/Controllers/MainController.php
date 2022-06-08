@@ -38,6 +38,7 @@ class MainController extends Controller
         return $this->prepareResponse([
             'tasks' => $tasks,
             'statuses' => $statuses,
+            'editable' => true,
         ]);
     }
 

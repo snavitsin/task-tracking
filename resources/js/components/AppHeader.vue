@@ -17,12 +17,14 @@
           v-text="'account_circle'"
           class="app-header__login-icon material-icons"/>
           <div
-          v-text="$store.state.user.emp_name"
+          v-text="$store.state.user.emp_fio"
           class="app-header__button"/>
         </template>
         <template #default>
           <div class="app-header__popover">
-
+            <div
+            v-text="$store.state.user.emp_position_title"
+            class="app-header__position"/>
             <a
             v-for="item in userLinks"
             :key="item.link"
@@ -97,14 +99,16 @@ export default {
   },
   computed: {
     userLinks() {
-      const links = [
-        { 'title': 'Мои комментарии', 'link': '/comments/my' },
+      let links = [
         { 'title': 'Мои задачи', 'link': '/' },
+        { 'title': 'Проекты', 'link': '/projects' },
+        { 'title': 'Подразделения', 'link': '/subdivisions' },
         { 'title': 'Все задачи', 'link': '/tasks/all' },
+        { 'title': 'Мои комментарии', 'link': '/comments/my' },
       ]
       if(this.$store.getters.checkRole('manager')) {
-        links.concat([
-          { 'title': 'Создание задачи', 'link': '/task/create' },
+        links = links.concat([
+          { 'title': 'Управление', 'link': '/management' },
           { 'title': 'Статистка', 'link': '/statistics' },
         ]);
       }
@@ -150,6 +154,7 @@ export default {
     text-align: center;
     cursor: pointer;
     transition: .2s;
+    z-index: 1;
 
     &-icon {
       font-size: 36px;
@@ -159,7 +164,12 @@ export default {
       opacity: .8;
     }
   }
-  
+
+  &__position {
+    color: #906fe9;
+    font-weight: bold;
+  }
+
   &__popover {
 
     > * + * {

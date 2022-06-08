@@ -51,7 +51,7 @@
           <button
           v-text="'Отмена'"
           @click="handleCancel()"
-          class="button button--positive kanban-board__button"/>
+          class="button button--neutral kanban-board__button"/>
         </div>
       </template>
     </modal>
@@ -170,8 +170,10 @@ export default {
   },
   computed: {
     modalText() {
-      const taskTtitle = this.selectedTask.task_title;
-      return `Вы действительно хотите изменить статус задачи "${taskTtitle}" на "${this.statusTitle}"?`;
+      if(this.selectedTask) {
+        const taskTtitle = this.selectedTask.task_title;
+        return `Вы действительно хотите изменить статус задачи "${taskTtitle}" на "${this.statusTitle}"?`;
+      }
     }
   },
   created() {

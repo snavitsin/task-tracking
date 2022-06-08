@@ -30,8 +30,6 @@ const store = new Vuex.Store({
     csrf: () => document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
 
     checkRole(state){
-      console.log(state.user.user_roles);
-      console.log(state.user.user_roles.find(i => i.slug == "manager"));
       return role => !!state.user && !!state.user.user_roles ? state.user.user_roles.find(i => i.slug == role) : null;
     },
   },

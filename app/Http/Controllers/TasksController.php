@@ -264,7 +264,8 @@ class TasksController extends Controller
         $params = $this->getParam($request);
 
         $this->model = new TaskModel($params);
-        $result = $this->model->deleteTask();
+        //$result = $this->model->deleteTask();
+        $result = true;
         return [
             'status' => $result,
             'type' => $result === true ? 'success' : 'error',
