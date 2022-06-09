@@ -1,5 +1,10 @@
 <template>
   <div class="subdivision-page">
+
+    <div
+    v-text="'Подразделение'"
+    class="subdivision-page__title" />
+
     <div class="subdivision-page__fields">
 
       <div class="subdivision-page__fields-header">
@@ -54,6 +59,7 @@
       </field-container>
     </div>
     <div
+    v-if="subdivData.subdiv_emps.length"
     v-text="'Сотрудники подразделения'"
     class="subdivision-page__emps-title" />
     <div class="subdivision-page__content">
@@ -69,7 +75,28 @@
         class="subdivision-page__emp-position" />
       </div>
     </div>
-
+    <div
+    v-if="subdivData.subdiv_projects.length"
+    v-text="'Проекты подразделения'"
+    class="subdivision-page__projects-title" />
+    <div class="subdivision-page__content">
+      <div
+      v-for="project in subdivData.subdiv_projects"
+      :key="project.project_id"
+      class="subdivision-page__project">
+        <div class="subdivision-page__project-title">
+          <a
+          v-text="project.project_title"
+          :href="getProjectUrl(project)"
+          target="_blank"
+          class="subdivision-page__project-link" />
+        </div>
+        <div
+        v-if="false"
+        v-text="emp.emp_position_title"
+        class="subdivision-page__emp-position" />
+      </div>
+    </div>
 
     <modal
     v-if="isConfirmModalShown"
@@ -124,11 +151,15 @@ export default {
   },
   methods: {
     getSubdivCountText(subdiv) {
-      return `Сотрудники: ${subdiv.subdiv_emp_count}`;
+      return `Сотрудники: ${subdiv.subdiv_emps.length}`;
     },
 
     getSubdivUrl(subdiv) {
       return `/subdivision/${subdiv.subdiv_id}`;
+    },
+
+    getProjectUrl(project) {
+      return `/projects/${project.project_id}`;
     },
 
     async saveSubdiv() {
@@ -156,7 +187,7 @@ export default {
       }
       this.$store.state.isLoading = false;
     },
-    async deleteTask() {
+    async deleteSubdiv() {
       this.$store.state.isLoading = true;
       const params = { subdiv_id: this.subdivData.subdiv_id };
       const res = await this.$store.dispatch('fetchData', { url: '/subdivisions/delete', params });
@@ -176,7 +207,7 @@ export default {
         });
 
         if(res.status === true) {
-          //await this.getTasks();
+          window.location.href = `/subdivisions/`;
         }
       }
       this.$store.state.isLoading = false;
@@ -265,10 +296,62 @@ export default {
     }
   }
 
+  &__project {
+    padding: 15px;
+    border: 3px solid var(--input-border-color, #906fe9);
+    border-radius: 5px;
+    box-shadow: 0 0 4px 4px rgb(154 161 177 / 15%), 0 4px 4px 1px rgb(91 94 105 / 15%), 0 4px 4px -2px rgb(91 94 105 / 15%);
+
+    &-title {
+      padding: 10px;
+      background: #fff;
+      border: 1px solid var(--input-border-color, #D3D8DB);
+    }
+
+    &-link {
+      display: block;
+      color: #1fe09e;
+      cursor: pointer;
+      font-weight: bold;
+
+      &:hover {
+        color: inherit;
+      }
+    }
+
+    &-position {
+      padding: 10px;
+      background: #fff;
+      border: 1px solid var(--input-border-color, #D3D8DB);
+    }
+
+    > * + * {
+      margin-top: 10px;
+    }
+  }
+
   &__title {
     color: #906fe9;
     font-weight: bold;
     font-size: 24px;
+  }
+
+  &__button {
+    flex: 1 1 auto;
+    margin: 10px;
+    min-width: 200px;
+  }
+
+  &__modal {
+    &-text {
+      margin: 10px;
+      font-size: 18px;
+    }
+
+    &-controls {
+      display: flex;
+      justify-content: space-between;
+    }
   }
 }
 </style>

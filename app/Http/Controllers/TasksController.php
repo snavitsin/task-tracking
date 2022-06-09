@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PriorityModel;
 use App\Models\ProjectModel;
 use App\Models\TaskModel;
-use App\Models\CommentsModel;
+use App\Models\CommentModel;
 use App\Models\StatusModel;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -42,8 +42,8 @@ class TasksController extends Controller
         $this->model = new TaskModel(['task_id' => $id]);
         $task = $this->model->getTask();
         $taskEmps = $this->model->getTaskEmployees();
-        $commentsModel = new CommentsModel(['task_id' => $id]);
-        $comments = $commentsModel->getTaskComments();
+        $commentModel = new CommentModel(['task_id' => $id]);
+        $comments = $commentModel->getTaskComments();
 
         $user = Auth::user();
         $userId = $user->getUserId();
@@ -205,6 +205,7 @@ class TasksController extends Controller
             'task_status',
             'task_title',
             'task_desc',
+            'task_resolution',
             'task_project',
             'task_dev',
             'task_tester',
@@ -217,6 +218,7 @@ class TasksController extends Controller
             'task_status' => 'required|integer',
             'task_title' => 'required|string',
             'task_desc' => 'required|string',
+            'task_resolution' => 'nullable|string',
             'task_project' => 'required|integer',
             'task_dev' => 'required|integer',
             'task_tester' => 'required|integer',
@@ -256,7 +258,7 @@ class TasksController extends Controller
             'task_id',
         ];
         $this->validatorRules = [
-            'task_id' => 'nullable|integer',
+            'task_id' => 'required|integer',
         ];
 
         if (!$this->isValidRequest($request)) return ['status' => false, 'errors' => $this->latestValidationErrors];
@@ -264,8 +266,7 @@ class TasksController extends Controller
         $params = $this->getParam($request);
 
         $this->model = new TaskModel($params);
-        //$result = $this->model->deleteTask();
-        $result = true;
+        $result = $this->model->deleteTask();
         return [
             'status' => $result,
             'type' => $result === true ? 'success' : 'error',

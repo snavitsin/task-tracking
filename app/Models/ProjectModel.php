@@ -2,12 +2,8 @@
 
 namespace App\Models;
 
-use Faker\Extension\Helper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Extensions\Helpers;
 
 class ProjectModel extends Model
 {
@@ -29,6 +25,8 @@ class ProjectModel extends Model
      */
     protected $primaryKey = 'project_id';
 
+
+    protected $appends = ['project_tasks'];
 
     /**
      * The attributes that are mass assignable.
@@ -54,5 +52,10 @@ class ProjectModel extends Model
     {
         $projects = ProjectModel::all()->toArray();
         return array_values($projects);
+    }
+
+    public function getProjectTasksAttribute()
+    {
+        return TaskModel::where('task_project', $this->attributes['project_id'])->get()->all();
     }
 }

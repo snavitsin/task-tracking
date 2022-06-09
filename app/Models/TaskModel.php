@@ -2,12 +2,9 @@
 
 namespace App\Models;
 
-use Faker\Extension\Helper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Extensions\Helpers;
 
 class TaskModel extends Model
 {
@@ -39,6 +36,7 @@ class TaskModel extends Model
         'task_id',
         'task_title',
         'task_desc',
+        'task_resolution',
         'task_status',
         'task_priority',
         'task_created',
@@ -47,6 +45,8 @@ class TaskModel extends Model
         'status_id',
         'emp_id',
     ];
+
+    protected $appends = ['task_priority_title', 'task_priority_color', 'task_project_title'];
 
     protected $operators = [
         'task_dev' => null,
@@ -244,5 +244,26 @@ class TaskModel extends Model
     public function fillTaskOperators($params) {
         $this->operators['task_dev'] = $params['task_dev'];
         $this->operators['task_tester'] = $params['task_tester'];
+    }
+
+    public function getTaskPriorityTitleAttribute()
+    {
+        $priorityId = $this->attributes['task_priority'];
+        $priority = PriorityModel::find($priorityId)->toArray();
+        return $priority['priority_title'];
+    }
+
+    public function getTaskPriorityColorAttribute()
+    {
+        $priorityId = $this->attributes['task_priority'];
+        $priority = PriorityModel::find($priorityId)->toArray();
+        return $priority['priority_color'];
+    }
+
+    public function getTaskProjectTitleAttribute()
+    {
+        $projectId = $this->attributes['task_project'];
+        $project = ProjectModel::find($projectId)->toArray();
+        return $project['project_title'];
     }
 }

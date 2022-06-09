@@ -25,6 +25,7 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/', [App\Http\Controllers\SubdivisionsController::class, 'getSubdivisionsPage']);
         Route::get('{id}', [App\Http\Controllers\SubdivisionsController::class, 'getSubdivisionPage']);
         Route::post('save', [App\Http\Controllers\SubdivisionsController::class, 'updateSubdiv']);
+        Route::post('delete', [App\Http\Controllers\SubdivisionsController::class, 'deleteSubdiv']);
     });
 
     Route::group(['prefix' => 'projects'], function ()
@@ -32,6 +33,7 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/', [App\Http\Controllers\ProjectsController::class, 'getProjectsPage']);
         Route::get('{id}', [App\Http\Controllers\TasksController::class, 'getTaskPage']);
         Route::post('update', [App\Http\Controllers\TasksController::class, 'updateTaskStatus']);
+        Route::post('delete', [App\Http\Controllers\TasksController::class, 'deleteTask']);
     });
 
     Route::group(['prefix' => 'tasks'], function () {

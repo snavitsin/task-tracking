@@ -2,15 +2,10 @@
 
 namespace App\Models;
 
-use Faker\Extension\Helper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Extensions\Helpers;
-use App\Models\TaskModel;
 
-class SubdivisionsModel extends Model
+class SubdivisionModel extends Model
 {
     use HasFactory;
 
@@ -31,7 +26,7 @@ class SubdivisionsModel extends Model
     protected $primaryKey = 'subdiv_id';
 
 
-    protected $appends = ['subdiv_emp_count', 'subdiv_emps'];
+    protected $appends = ['subdiv_emps', 'subdiv_projects'];
 
     /**
      * The attributes that are mass assignable.
@@ -51,20 +46,20 @@ class SubdivisionsModel extends Model
 
     public function getSubdivisions()
     {
-        $subdivs = SubdivisionsModel::all()->toArray();
+        $subdivs = SubdivisionModel::all()->toArray();
         return array_values($subdivs);
     }
 
     public function getSubdivision()
     {
         $subdivId = $this->attributes['subdiv_id'];
-        return SubdivisionsModel::find($subdivId)->toArray();
+        return SubdivisionModel::find($subdivId)->toArray();
     }
 
     public function updateSubdiv()
     {
         $subdivId = $this->attributes['subdiv_id'];
-        $subdiv = SubdivisionsModel::find($subdivId);
+        $subdiv = SubdivisionModel::find($subdivId);
         $result = null;
         if ($subdiv) {
             $subdiv->attributes = $this->attributes;
@@ -73,13 +68,19 @@ class SubdivisionsModel extends Model
         return $result;
     }
 
-    public function getSubdivEmpCountAttribute()
-    {
-        return User::where('emp_subdiv', $this->attributes['subdiv_id'])->get()->count();
+    public function deleteSubdiv() {
+        $subdivId = $this->attributes['subdiv_id'];
+        $task = SubdivisionModel::find($subdivId);
+        return $task->delete();
     }
 
     public function getSubdivEmpsAttribute()
     {
         return User::where('emp_subdiv', $this->attributes['subdiv_id'])->get()->all();
+    }
+
+    public function getSubdivProjectsAttribute()
+    {
+        return ProjectModel::where('project_subdiv', $this->attributes['subdiv_id'])->get()->all();
     }
 }

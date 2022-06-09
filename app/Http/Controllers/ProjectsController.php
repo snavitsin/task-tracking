@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class SubdivisionsController extends Controller
+class ProjectsController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -22,59 +22,63 @@ class SubdivisionsController extends Controller
      */
     public function __construct()
     {
-        $this->defaultView = 'subdivisions';
+        $this->defaultView = 'projects';
     }
 
     /**
-     * Страница подразделений
+     * Страница проектов
      * @param Request $request
      * @return mixed
      */
-    public function getSubdivisionsPage(Request $request)
+    public function getProjectsPage(Request $request)
     {
-        $this->model = new SubdivisionModel();
-        $subdivs = $this->model->getSubdivisions();
+        $this->model = new ProjectModel();
+        $projects = $this->model->getProjects();
 
         return $this->prepareResponse([
-            'subdivs' => $subdivs,
+            'projects' => $projects,
         ]);
     }
 
     /**
-     * Страница подразделения
+     * Страница проекта
      * @param Request $request
      * @return mixed
      */
-    public function getSubdivisionPage(Request $request, $id)
+    public function getProjectPage(Request $request, $id)
     {
         $this->params = [
-            'subdiv_id'
+            'project_id'
         ];
         $this->validatorRules = [
-            'subdiv_id' => 'required|integer',
+            'project_id' => 'required|integer',
         ];
-        if (!$this->isValidRequest($request, ['subdiv_id' => $id])) return ['status' => false, 'errors' => $this->latestValidationErrors];
+        if (!$this->isValidRequest($request, ['project_id' => $id])) return ['status' => false, 'errors' => $this->latestValidationErrors];
 
-        $this->defaultView = 'subdivision';
-        $this->model = new SubdivisionModel(['subdiv_id' => $id]);
-        $subdiv = $this->model->getSubdivision();
+        $this->defaultView = 'project';
+        $this->model = new ProjectModel(['project_id' => $id]);
+        $project = $this->model->getProject();
 
         return $this->prepareResponse([
-            'subdiv' => $subdiv,
+            'project' => $project,
         ]);
     }
 
     /**
-     * Обновление подразделения
+     * Обновление проекта
      * @param Request $request
      * @return mixed
      */
-    public function updateSubdiv(Request $request)
+    public function updateProject(Request $request)
     {
         $this->params = [
-            'subdiv_id',
-            'subdiv_title',
-            'subdiv_desc',
+            'project_id',
+            'project_title',
+            'project_desc',
+            'project_customer',
+            'project_dev_deadline',
+            'project_dev_start',
+            'project_subdiv',
         ];
         $this->validatorRules = [
             'subdiv_id' => 'required|integer',
@@ -100,33 +104,33 @@ class SubdivisionsController extends Controller
      * @param Request $request
      * @return mixed
      */
-    public function deleteSubdiv(Request $request)
+    public function deleteProject(Request $request)
     {
         $this->params = [
-            'subdiv_id',
+            'project_id',
         ];
         $this->validatorRules = [
-            'subdiv_id' => 'required|integer',
+            'project_id' => 'required|integer',
         ];
 
         if (!$this->isValidRequest($request)) return ['status' => false, 'errors' => $this->latestValidationErrors];
 
         $params = $this->getParam($request);
-        $subdiv = SubdivisionModel::find($params['subdiv_id'])->toArray();
-        if(count($subdiv['subdiv_emps']) > 0) {
+        $project = ProjectModel::find($params['project_id'])->toArray();
+        if(count($project['project_tasks']) > 0) {
             return [
                 'status' => false,
                 'type' => 'error',
-                'message' => 'В подразделении остались сотрудники'
+                'message' => 'У проекта остались задачи'
             ];
         } else {
-            $result = $subdiv->delete();
+            $result = $project->delete();
         }
 
         return [
             'status' => $result,
             'type' => $result === true ? 'success' : 'error',
-            'message' => $result === true ? 'Подразделение успешно удалено' : 'Произошла ошибка'
+            'message' => $result === true ? 'Проект успешно удален' : 'Произошла ошибка'
         ];
     }
 }

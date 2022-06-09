@@ -101,10 +101,10 @@ export default {
     userLinks() {
       let links = [
         { 'title': 'Мои задачи', 'link': '/' },
+        { 'title': 'Все задачи', 'link': '/tasks/all' },
         { 'title': 'Проекты', 'link': '/projects' },
         { 'title': 'Подразделения', 'link': '/subdivisions' },
-        { 'title': 'Все задачи', 'link': '/tasks/all' },
-        { 'title': 'Мои комментарии', 'link': '/comments/my' },
+        //{ 'title': 'Мои комментарии', 'link': '/comments/my' },
       ]
       if(this.$store.getters.checkRole('manager')) {
         links = links.concat([

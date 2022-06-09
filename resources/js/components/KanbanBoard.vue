@@ -1,5 +1,9 @@
 <template>
   <div class="kanban-board">
+    <div
+    v-text="'Kanban доска задач'"
+    class="kanban-board__title" />
+
     <div class="kanban-board__content">
       <div
       v-for="group in mappedTasks"
@@ -20,11 +24,17 @@
             v-for="task in group.tasks"
             :key="task.task_id"
             class="kanban-board__task">
-              <a
-              v-text="`#${task.task_id}`"
-              :href="getTaskUrl(task.task_id)"
-              target="_blank"
-              class="kanban-board__task-number" />
+              <div class="kanban-board__task-header">
+                <a
+                v-text="`#${task.task_id}`"
+                :href="getTaskUrl(task.task_id)"
+                target="_blank"
+                class="kanban-board__task-number" />
+                <div
+                v-text="task.task_priority_title"
+                :style="getPriorityStyle(task)"
+                class="kanban-board__task-priority" />
+              </div>
               <div
               v-text="task.task_title"
               class="kanban-board__task-title" />
@@ -166,7 +176,12 @@ export default {
 
     getTaskUrl(task_id) {
       return `/tasks/${task_id}`;
+    },
+
+    getPriorityStyle(task) {
+      return task.task_priority_color ? `background-color: ${task.task_priority_color}` : null;
     }
+
   },
   computed: {
     modalText() {
@@ -184,6 +199,17 @@ export default {
 
 <style lang="scss">
 .kanban-board {
+
+  > * + * {
+    margin-top: 20px;
+  }
+
+  &__title {
+    color: #906fe9;
+    font-weight: bold;
+    font-size: 24px;
+  }
+
   &__content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -225,13 +251,26 @@ export default {
   }
 
   &__task {
+    &-header {
+      display: flex;
+      justify-content: flex-start;
+
+      > * + * {
+        margin-left: 10px;
+      }
+    }
+
+    &-priority {
+      //background-color: #f7f7f8;
+      padding: 5px;
+      border-radius: 5px;
+    }
+
     &-number {
-      float: left;
       color: #1fe09e;
       background-color: #f7f7f8;
       padding: 5px;
       border-radius: 5px;
-      margin-right: 10px;
 
       &:hover {
         //color: #1fe09e;
@@ -240,7 +279,10 @@ export default {
     }
 
     &-title {
+      background-color: #f7f7f8;
       padding: 5px;
+      border-radius: 5px;
+      //border: 1px solid var(--input-border-color, #906fe9);
     }
 
     cursor: pointer;
@@ -249,6 +291,10 @@ export default {
     background: linear-gradient(180deg, rgba(144,111,233,0.3) 0%, rgba(231,222,249,1) 100%);
     padding: 10px;
     border-radius: 5px;
+
+    > * + * {
+      margin-top: 10px;
+    }
   }
 
   &__modal {

@@ -90,23 +90,6 @@
             class="task-page__textarea"/>
           </field-container>
         </div>
-        <div class="task-page__resolution">
-          <field-container
-          :is-required="false"
-          :errors="veeErrors.collect('task_resolution')"
-          title="Решение"
-          class="report-answer-quality__field">
-            <field-textarea
-            v-model="taskData.task_resolution"
-            :data-vv-as="' '"
-            :is-error="veeErrors.has('task_resolution')"
-            :disabled="!canEditResolution"
-            placeholder="Решение"
-            name="task_resolution"
-            max="5000"
-            class="task-page__textarea"/>
-          </field-container>
-        </div>
         <div
         v-if="comments.length"
         class="task-page__comments">
@@ -257,7 +240,7 @@ import { findIndex, cloneDeep } from 'lodash';
 import Modal from '../Modal';
 
 export default {
-  name: "TaskPage",
+  name: "ProjectPage",
   components: { Modal, FieldContainer, FieldDropdown, FieldInput, FieldTextarea, FieldDatepicker },
   props: {
     task: { type: Object, default: () => {} },
@@ -373,9 +356,6 @@ export default {
     editable() {
       return this.isManager || this.isTaskOperator;
     },
-    canEditResolution () {
-      return this.isManager || (this.isTaskOperator && this.$store.getters.checkRole('developer'));
-    },
     saveButtonText() {
       return this.isNewTask === true ? 'Создать' : 'Сохранить';
     },
@@ -439,12 +419,6 @@ export default {
 
     @media (max-width: 480px) {
       flex-wrap: wrap;
-    }
-  }
-
-  &__resolution {
-    .textarea {
-      font-size: 15px;
     }
   }
 

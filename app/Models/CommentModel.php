@@ -2,15 +2,11 @@
 
 namespace App\Models;
 
-use Faker\Extension\Helper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Extensions\Helpers;
-use App\Models\TaskModel;
 
-class CommentsModel extends Model
+class CommentModel extends Model
 {
     use HasFactory;
 
@@ -54,7 +50,7 @@ class CommentsModel extends Model
     public function getTaskComments()
     {
         $taskId = $this->attributes['task_id'];
-        $comments = CommentsModel::all()->where('comment_task', $taskId)->toArray();
+        $comments = CommentModel::all()->where('comment_task', $taskId)->toArray();
         return array_values($comments);
     }
 

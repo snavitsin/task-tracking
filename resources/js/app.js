@@ -7,6 +7,7 @@ import '../sass/app.scss';
 import { vTippy, vMask } from './directives';
 
 import VeeValidate, { Validator } from 'vee-validate';
+import ru from 'vee-validate/dist/locale/ru';
 
 import VueIcon from 'vue-icon'
 import Vue from 'vue';
@@ -15,7 +16,11 @@ import Notifications from 'vue-notification';
 
 window.Vue = require('vue').default;
 
+Validator.localize('ru', ru);
+//Validator.localize('ru');
+
 Vue.use(VeeValidate, {
+    locale: ru,
     errorBagName: 'veeErrors',
     fieldsBagName: 'veeFields',
 });
@@ -30,6 +35,8 @@ Vue.component('main-page', require('./components/MainPage.vue').default);
 Vue.component('login-page', require('./components/Pages/LoginPage.vue').default);
 Vue.component('error-page', require('./components/Pages/ErrorPage.vue').default);
 Vue.component('task-page', require('./components/Pages/TaskPage.vue').default);
+Vue.component('projects-page', require('./components/Pages/ProjectsPage.vue').default);
+Vue.component('project-page', require('./components/Pages/ProjectPage.vue').default);
 Vue.component('subdivisions-page', require('./components/Pages/SubdivisionsPage.vue').default);
 Vue.component('subdivision-page', require('./components/Pages/SubdivisionPage.vue').default);
 Vue.component('app', require('./components/App.vue').default);

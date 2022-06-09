@@ -39,6 +39,7 @@ class PriorityModel extends Model
         'priority_id',
         'priority_title',
         'priority_slug',
+        'priority_color',
     ];
 
     public function __construct($values = [])

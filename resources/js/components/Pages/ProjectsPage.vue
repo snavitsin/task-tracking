@@ -1,28 +1,28 @@
 <template>
-  <div class="subdivisions-page">
+  <div class="projects-page">
     <div
-    v-text="'Подразделения'"
-    class="subdivisions-page__title" />
-    <div class="subdivisions-page__content">
+    v-text="'Проекты'"
+    class="projects-page__title" />
+    <div class="projects-page__content">
       <div
-      v-for="subdiv in subdivsData"
-      :key="subdiv.subdiv_id"
-      class="subdivisions-page__subdiv">
+      v-for="project in projectsData"
+      :key="project.project_id"
+      class="projects-page__project">
 
 
-        <div class="subdivisions-page__subdiv-title">
+        <div class="projects-page__project-title">
           <a
-          v-text="subdiv.subdiv_title"
-          :href="getSubdivUrl(subdiv)"
+          v-text="project.project_title"
+          :href="getProjectUrl(project)"
           target="_blank"
-          class="subdivisions-page__subdiv-link" />
+          class="projects-page__project-link" />
         </div>
         <div
-        v-text="getSubdivCountText(subdiv)"
-        class="subdivisions-page__subdiv-count" />
+        v-text="getProjectTasksCountText(project)"
+        class="projects-page__project-count" />
         <div
-        v-text="subdiv.subdiv_desc"
-        class="subdivisions-page__subdiv-desc" />
+        v-text="project.project_desc"
+        class="projects-page__project-desc" />
       </div>
     </div>
   </div>
@@ -30,26 +30,25 @@
 
 <script>
 
-import Modal from '../Modal';
 
 export default {
-  name: "SubdivisionsPage",
+  name: "ProjectsPage",
   components: { },
   props: {
-    subdivs: { type: Array, default: () => [] },
+    projects: { type: Array, default: () => [] },
   },
   data() {
     return {
-      subdivsData: this.subdivs,
+      projectsData: this.projects,
     }
   },
   methods: {
-    getSubdivCountText(subdiv) {
-      return `Сотрудники: ${subdiv.subdiv_emps.length}`;
+    getProjectTasksCountText(project) {
+      return `Задачи: ${project.project_tasks.length}`;
     },
 
-    getSubdivUrl(subdiv) {
-      return `/subdivisions/${subdiv.subdiv_id}`;
+    getProjectUrl(project) {
+      return `/projects/${project.project_id}`;
     },
 
   },
@@ -57,7 +56,7 @@ export default {
 </script>
 
 <style lang="scss">
-.subdivisions-page {
+.projects-page {
 
   --accent-color: #906fe9;
 
@@ -78,7 +77,7 @@ export default {
     gap: 20px;
   }
 
-  &__subdiv {
+  &__project {
     padding: 15px;
     border: 3px solid var(--input-border-color, #906fe9);
     border-radius: 5px;
