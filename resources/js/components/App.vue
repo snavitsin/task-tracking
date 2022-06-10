@@ -50,7 +50,7 @@ export default {
   },
   metaInfo() {
     return {
-      title: 'Управление проектами'
+      title: 'Yeskela'
     }
   },
 }

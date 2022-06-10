@@ -31,9 +31,9 @@ Route::group(['middleware' => 'auth'], function(){
     Route::group(['prefix' => 'projects'], function ()
     {
         Route::get('/', [App\Http\Controllers\ProjectsController::class, 'getProjectsPage']);
-        Route::get('{id}', [App\Http\Controllers\TasksController::class, 'getTaskPage']);
-        Route::post('update', [App\Http\Controllers\TasksController::class, 'updateTaskStatus']);
-        Route::post('delete', [App\Http\Controllers\TasksController::class, 'deleteTask']);
+        Route::get('{id}', [App\Http\Controllers\ProjectsController::class, 'getProjectPage']);
+        Route::post('save', [App\Http\Controllers\ProjectsController::class, 'saveProject']);
+        Route::post('delete', [App\Http\Controllers\ProjectsController::class, 'deleteProject']);
     });
 
     Route::group(['prefix' => 'tasks'], function () {

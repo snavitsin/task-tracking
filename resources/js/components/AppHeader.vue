@@ -1,7 +1,7 @@
 <template>
   <div class="app-header">
     <a
-    v-text="'Управление проектами'"
+    v-text="'Система управления проектами Yeskela'"
     href="/"
     class="app-header__logo"/>
 

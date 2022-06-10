@@ -2,16 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PriorityModel;
 use App\Models\ProjectModel;
 use App\Models\SubdivisionModel;
-use App\Models\TaskModel;
-use App\Models\CommentModel;
-use App\Models\StatusModel;
-use App\Models\User;
+use App\Models\CustomerModel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class ProjectsController extends Controller
 {
@@ -59,8 +53,16 @@ class ProjectsController extends Controller
         $this->model = new ProjectModel(['project_id' => $id]);
         $project = $this->model->getProject();
 
+        $subdivisionsModel = new SubdivisionModel();
+        $subdivisions = $subdivisionsModel->getSubdivisions();
+
+        $customersModel = new CustomerModel();
+        $customers = $customersModel->getCustomers();
+
         return $this->prepareResponse([
             'project' => $project,
+            'customers' => $customers,
+            'subdivisions' => $subdivisions,
         ]);
     }
 
@@ -69,7 +71,7 @@ class ProjectsController extends Controller
      * @param Request $request
      * @return mixed
      */
-    public function updateProject(Request $request)
+    public function saveProject(Request $request)
     {
         $this->params = [
             'project_id',

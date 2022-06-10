@@ -28,7 +28,7 @@
         <!-- Styles -->
         <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
-        <title>Управление проектами</title>
+        <title>Система управления проектами Yeskela</title>
     </head>
     <body>
         <div id="app">

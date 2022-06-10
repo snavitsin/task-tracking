@@ -252,8 +252,6 @@ import FieldInput from "../Fields/FieldInput";
 import FieldTextarea from "../Fields/FieldTextarea";
 import FieldDatepicker from "../Fields/FieldDatepicker";
 
-import draggable from 'vuedraggable'
-import { findIndex, cloneDeep } from 'lodash';
 import Modal from '../Modal';
 
 export default {
@@ -289,20 +287,6 @@ export default {
     }
   },
   methods: {
-
-    async handleDrag(event) {
-      if(event.added) {
-        const addedTask = event.added.element;
-        this.mappedTasks.forEach(group => {
-          if(group.tasks.find(task => task.task_id === addedTask.task_id)) {
-            this.selectedTask = addedTask;
-            this.newStatus = group.status_id;
-            this.statusTitle = group.title;
-            this.isConfirmModalShown = true;
-          }
-        });
-      }
-    },
 
     async saveTask() {
       this.$store.state.isLoading = true;

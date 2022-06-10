@@ -44,12 +44,6 @@
 import FieldContainer from "../Fields/FieldContainer";
 import FieldInput from "../Fields/FieldInput";
 
-//import Sidebar from './Sidebar';
-// import NewPinForm from "./NewPinForm";
-// import MainMap from "./MainMap";
-// import CheckBoxInput from "./CheckBoxInput";
-import {findIndex, cloneDeep} from 'lodash';
-
 export default {
   name: "MainPage",
   components: { FieldContainer, FieldInput },

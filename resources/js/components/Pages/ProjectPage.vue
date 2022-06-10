@@ -1,226 +1,173 @@
 <template>
-  <div class="task-page">
+  <div class="project-page">
     <div
-    v-text="'Задача'"
-    class="task-page__page-title" />
+    v-text="'Проект'"
+    class="project-page__page-title" />
 
-    <div class="task-page__content">
-      <div class="task-page__main">
-        <div class="task-page__header">
-          <div class="task-page__task-title">
+    <div class="project-page__content">
+      <div class="project-page__main">
+        <div class="project-page__header">
+          <div class="project-page__task-title">
             <field-container
             :is-required="true"
-            :errors="veeErrors.collect('task_title')"
+            :errors="veeErrors.collect('project_title')"
             title="Заголовок"
-            class="task-page__field task-page__title">
+            class="project-page__field project-page__title">
               <field-input
-              v-model="taskData.task_title"
+              v-model="projectData.project_title"
               v-validate="'required'"
-              :isError="veeErrors.has('task_title')"
+              :isError="veeErrors.has('project_title')"
               :data-vv-as="' '"
               maxlength="255"
-              name="task_title" />
+              name="project_title" />
             </field-container>
           </div>
-          <div class="task-page__combos">
+          <div class="project-page__combos">
             <field-container
             :is-required="true"
-            :errors="veeErrors.collect('task_priority')"
-            title="Приоритет"
-            class="task-page__field">
+            :errors="veeErrors.collect('project_subdiv')"
+            title="Подразделение"
+            class="project-page__field">
               <field-dropdown
-              class="task-page__dropdown"
-              v-model="taskData.task_priority"
-              :data="priority"
+              class="project-page__dropdown"
+              v-model="projectData.project_subdiv"
+              :data="subdivisions"
               :disabled="!isManager"
               searchable
-              placeholder="Приоритет"
-              value-name="priority_id"
-              label-name="priority_title" />
+              placeholder="Подразделение"
+              value-name="subdiv_id"
+              label-name="subdiv_title" />
             </field-container>
 
             <field-container
             :is-required="true"
-            :errors="veeErrors.collect('task_status')"
-            title="Статус"
-            class="task-page__field">
+            :errors="veeErrors.collect('project_customer')"
+            title="Заказчик"
+            class="project-page__field">
               <field-dropdown
-              class="task-page__dropdown"
-              v-model="taskData.task_status"
-              :data="statuses"
-              :disabled="!editable"
+              class="project-page__dropdown"
+              v-model="projectData.project_customer"
+              :data="customers"
+              :disabled="!isNewProject"
               searchable
-              placeholder="Статус"
-              value-name="status_id"
-              label-name="status_title" />
+              placeholder="Заказчик"
+              value-name="customer_id"
+              label-name="customer_fio" />
             </field-container>
           </div>
         </div>
 
         <div
-        class="task-page__controls">
+        class="project-page__controls">
           <button
-          @click="saveTask"
+          @click="saveProject"
           v-text="saveButtonText"
-          class="button button--positive task-page__control"/>
+          class="button button--positive project-page__control"/>
           <button
           @click="cancelChanges"
           v-text="'Отменить изменения'"
-          class="button button--neutral task-page__control"/>
+          class="button button--neutral project-page__control"/>
           <button
-          v-if="!isNewTask && isManager"
+          v-if="!isNewProject && isManager"
           @click="isConfirmModalShown = true"
           v-text="'Удалить'"
-          class="button button--negative task-page__control"/>
+          class="button button--negative project-page__control"/>
         </div>
-        <div class="task-page__description">
+        <div class="project-page__description">
           <field-container
           :is-required="true"
-          :errors="veeErrors.collect('task_desc')"
+          :errors="veeErrors.collect('project_desc')"
           title="Описание"
           class="report-answer-quality__field">
             <field-textarea
-            v-model="taskData.task_desc"
+            v-model="projectData.project_desc"
             :data-vv-as="' '"
-            :is-error="veeErrors.has('task_desc')"
+            :is-error="veeErrors.has('project_desc')"
             :disabled="!editable"
             placeholder="Описание"
-            name="task_desc"
+            name="project_desc"
             max="300"
-            class="task-page__textarea"/>
+            class="project-page__textarea"/>
           </field-container>
         </div>
         <div
-        v-if="comments.length"
-        class="task-page__comments">
+        v-if="projectData.project_tasks.length"
+        class="project-page__tasks">
           <div
-          v-text="'Комментарии'"
-          class="task-page__comments-title" />
-          <div
-          v-for="comment in comments"
-          :key="comment.comment_id"
-          class="task-page__comment">
+          v-text="'Задачи'"
+          class="project-page__tasks-title" />
+          <div class="project-page__tasks-content">
             <div
-            v-text="comment.comment_author"
-            class="task-page__comment-author" />
-            <div
-            v-text="comment.comment_comment"
-            class="task-page__comment-text" />
+            v-for="task in projectData.project_tasks"
+            :key="task.task_id"
+            class="project-page__task">
+              <div class="project-page__task-header">
+                <a
+                v-text="`#${task.task_id}`"
+                :href="getTaskUrl(task.task_id)"
+                target="_blank"
+                class="project-page__task-number" />
+                <div
+                v-text="task.task_priority_title"
+                :style="getPriorityStyle(task)"
+                class="project-page__task-priority" />
+              </div>
+              <div
+              v-text="task.task_title"
+              class="project-page__task-title" />
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="task-page__side">
+      <div class="project-page__side">
         <field-container
-        :is-required="true"
-        :errors="veeErrors.collect('task_project')"
-        title="Проект"
-        class="task-page__field">
-          <field-dropdown
-          class="task-page__dropdown"
-          v-model="taskData.task_project"
-          :data="projects"
-          :disabled="!isNewTask"
-          searchable
-          placeholder="Проект"
-          value-name="project_id"
-          label-name="project_title" />
+        v-if="!isNewProject"
+        :errors="veeErrors.collect('project_dev_start')"
+        title="Дата начала разработки"
+        class="project-page__field project-page__datepicker">
+          <field-datepicker
+          v-model="projectData.project_dev_start"
+          v-validate="'required'"
+          :data-vv-as="'Дата начала разработки'"
+          formatter="dd.MM.yyyy"
+          readonly
+          :disabled="true" />
         </field-container>
 
-        <div class="task-page__operators">
-          <field-container
-          title="Автор задачи"
-          class="task-page__field">
-            <field-input
-            v-model="taskAuthor"
-            :data-vv-as="' '"
-            readonly
-            name="task_title" />
-          </field-container>
-
-          <field-container
-          :is-required="true"
-          :errors="veeErrors.collect('task_dev')"
-          title="Разработчик"
-          class="task-page__field">
-            <field-dropdown
-            class="task-page__dropdown"
-            v-model="taskData.task_dev"
-            :data="developers"
-            :disabled="!isManager"
-            searchable
-            placeholder="Разработчик"
-            value-name="emp_id"
-            label-name="emp_fio" />
-          </field-container>
-
-          <field-container
-          :is-required="true"
-          :errors="veeErrors.collect('task_tester')"
-          title="Тестировщик"
-          class="task-page__field">
-            <field-dropdown
-            class="task-page__dropdown"
-            v-model="taskData.task_tester"
-            :data="testers"
-            :disabled="!isManager"
-            searchable
-            placeholder="Тестировщик"
-            value-name="emp_id"
-            label-name="emp_fio" />
-          </field-container>
-        </div>
-        <div class="task-page__info">
-
-          <field-container
-          v-if="!isNewTask"
-          :errors="veeErrors.collect('task_created')"
-          title="Дата создания"
-          class="task-page__field task-page__datepicker">
-            <field-datepicker
-            v-model="taskData.task_created"
-            v-validate="'required'"
-            :data-vv-as="'Дата создания'"
-            formatter="dd.MM.yyyy"
-            readonly
-            :disabled="true" />
-          </field-container>
-
-          <field-container
-          :is-required="true"
-          :errors="veeErrors.collect('task_deadline')"
-          title="Срок выполнения"
-          class="task-page__field task-page__datepicker">
-            <field-datepicker
-            v-model="taskData.task_deadline"
-            v-validate="'required'"
-            :data-vv-as="'Срок выполнения'"
-            formatter="dd.MM.yyyy"
-            :readonly="isManager"/>
-          </field-container>
-        </div>
-
+        <field-container
+        :is-required="true"
+        :errors="veeErrors.collect('project_dev_deadline')"
+        title="Срок выполнения"
+        class="project-page__field project-page__datepicker">
+          <field-datepicker
+          v-model="projectData.project_dev_deadline"
+          v-validate="'required'"
+          :data-vv-as="'Срок выполнения'"
+          formatter="dd.MM.yyyy"
+          :readonly="isManager"/>
+        </field-container>
       </div>
     </div>
 
     <modal
     v-if="isConfirmModalShown"
     @modal:close="isConfirmModalShown = false"
-    class="task-page__modal">
+    class="project-page__modal">
       <div
-      v-text="'Вы уверены, что хотите удалить задачу?'"
-      class="task-page__modal-text"/>
+      v-text="'Вы уверены, что хотите удалить проект?'"
+      class="project-page__modal-text"/>
 
       <template #buttons>
-        <div class="task-page__modal-controls">
+        <div class="project-page__modal-controls">
           <button
           v-text="'Удалить'"
           @click="handleConfirmation()"
-          class="button button--negative task-page__button"/>
+          class="button button--negative project-page__button"/>
           <button
           v-text="'Отмена'"
           @click="handleCancel()"
-          class="button button--neutral task-page__button"/>
+          class="button button--neutral project-page__button"/>
         </div>
       </template>
     </modal>
@@ -235,62 +182,35 @@ import FieldInput from "../Fields/FieldInput";
 import FieldTextarea from "../Fields/FieldTextarea";
 import FieldDatepicker from "../Fields/FieldDatepicker";
 
-import draggable from 'vuedraggable'
-import { findIndex, cloneDeep } from 'lodash';
 import Modal from '../Modal';
 
 export default {
   name: "ProjectPage",
   components: { Modal, FieldContainer, FieldDropdown, FieldInput, FieldTextarea, FieldDatepicker },
   props: {
-    task: { type: Object, default: () => {} },
-    taskEmps: { type: Array, default: () => [] },
-    comments: { type: Array, default: () => [] },
-    priority: { type: Array, default: () => [] },
-    statuses: { type: Array, default: () => [] },
-    developers: { type: Array, default: () => [] },
-    testers: { type: Array, default: () => [] },
-    projects: { type: Array, default: () => [] },
-    isManager: { type: Boolean, default: () => false },
-    isTaskOperator: { type: Boolean, default: () => false },
-    isNewTask: { type: Boolean, default: () => false },
-
+    project: { type: Object, default: () => {} },
+    customers: { type: Array, default: () => [] },
+    subdivisions: { type: Array, default: () => [] },
+    isNewProject: { type: Boolean, default: () => false },
   },
   data() {
     return {
-      taskData: this.task,
+      projectData: this.project,
       drag: false,
       filters: {},
-      mappedTasks: [],
-      selectedTask: null,
-      newStatus: null,
       isConfirmModalShown: false,
-      emptyTask: {
-        task_title: 'Новая задача',
-        task_desc: 'Описание'
+      emptyProject: {
+        project_title: 'Новый проект',
+        project_desc: 'Описание'
       }
     }
   },
   methods: {
 
-    async handleDrag(event) {
-      if(event.added) {
-        const addedTask = event.added.element;
-        this.mappedTasks.forEach(group => {
-          if(group.tasks.find(task => task.task_id === addedTask.task_id)) {
-            this.selectedTask = addedTask;
-            this.newStatus = group.status_id;
-            this.statusTitle = group.title;
-            this.isConfirmModalShown = true;
-          }
-        });
-      }
-    },
-
-    async saveTask() {
+    async saveProject() {
       this.$store.state.isLoading = true;
-      const params = { ...this.taskData };
-      const res = await this.$store.dispatch('fetchData', { url: '/tasks/save', params });
+      const params = { ...this.projectData };
+      const res = await this.$store.dispatch('fetchData', { url: '/projects/save', params });
 
       if(res?.errors) {
         const self = this;
@@ -313,10 +233,10 @@ export default {
       this.$store.state.isLoading = false;
     },
 
-    async deleteTask() {
+    async deleteProject() {
       this.$store.state.isLoading = true;
-      const params = { task_id: this.taskData.task_id };
-      const res = await this.$store.dispatch('fetchData', { url: '/tasks/delete', params });
+      const params = { project_id: this.projectData.project_id };
+      const res = await this.$store.dispatch('fetchData', { url: '/projects/delete', params });
 
       if(res?.errors) {
         const self = this;
@@ -333,18 +253,26 @@ export default {
         });
 
         if(res.status === true) {
-          window.location.href = `/`;
+          window.location.href = `/projects`;
         }
       }
       this.$store.state.isLoading = false;
     },
 
     cancelChanges() {
-      this.taskData = this.isNewTask ? this.emptyTask : this.task;
+      this.projectData = this.isNewProject ? this.emptyProject : this.project;
+    },
+
+    getTaskUrl(task_id) {
+      return `/tasks/${task_id}`;
+    },
+
+    getPriorityStyle(task) {
+      return task.task_priority_color ? `background-color: ${task.task_priority_color}` : null;
     },
 
     handleConfirmation() {
-      this.deleteTask();
+      this.deleteProject();
       this.isConfirmModalShown = false;
     },
     handleCancel() {
@@ -353,26 +281,29 @@ export default {
 
   },
   computed: {
+    isManager() {
+      return this.$store.getters.checkRole('manager');
+    },
     editable() {
       return this.isManager || this.isTaskOperator;
     },
     saveButtonText() {
-      return this.isNewTask === true ? 'Создать' : 'Сохранить';
+      return this.isNewProject === true ? 'Создать' : 'Сохранить';
     },
-    taskAuthor() {
-      const author = this.taskEmps.find(emp => emp.emp_position == 3);
-      return author ? author.emp_fio : null;
+    projectCustomer() {
+      const customer = this.customers.find(customer => customer.id == 3);
+      return customer ? customer.customer_fio : null;
     }
   },
   created() {
-    if(this.isNewTask)
-      this.taskData = this.emptyTask;
+    if(this.isNewProject)
+      this.projectData = this.emptyProject;
   }
 }
 </script>
 
 <style lang="scss">
-.task-page {
+.project-page {
 
   --accent-color: #906fe9;
 
@@ -573,6 +504,62 @@ export default {
       flex: 1 1 auto;
       margin: 10px;
       min-width: 200px;
+    }
+  }
+
+  &__tasks {
+    &-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-auto-rows: 1fr;
+      gap: 20px;
+    }
+  }
+
+  &__task {
+    &-header {
+      display: flex;
+      justify-content: flex-start;
+
+      > * + * {
+        margin-left: 10px;
+      }
+    }
+
+    &-priority {
+      //background-color: #f7f7f8;
+      padding: 5px;
+      border-radius: 5px;
+    }
+
+    &-number {
+      color: #1fe09e;
+      background-color: #f7f7f8;
+      padding: 5px;
+      border-radius: 5px;
+
+      &:hover {
+        //color: #1fe09e;
+        //text-decoration: underline;
+      }
+    }
+
+    &-title {
+      background-color: #f7f7f8;
+      padding: 5px;
+      border-radius: 5px;
+      //border: 1px solid var(--input-border-color, #906fe9);
+    }
+
+    cursor: pointer;
+    //background-color: #e7def9;
+    background: rgb(144,111,233);
+    background: linear-gradient(180deg, rgba(144,111,233,0.3) 0%, rgba(231,222,249,1) 100%);
+    padding: 10px;
+    border-radius: 5px;
+
+    > * + * {
+      margin-top: 10px;
     }
   }
 

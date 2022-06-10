@@ -102,21 +102,8 @@ export default {
     }
 }
 
-.fade-enter-active, .fade-enter-active .busy-dialog,
-.fade-leave-active, .fade-leave-active .busy-dialog {
-    transition: all 0.2s ease-out;
-}
-
-.fade-enter {
-    opacity: 0;
-}
-
 .fade-enter .busy-dialog {
     transform: scale(0.9);
-}
-
-.fade-leave-to {
-    opacity: 0;
 }
 
 .fade-leave-to .busy-dialog {

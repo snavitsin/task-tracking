@@ -54,6 +54,22 @@ class ProjectModel extends Model
         return array_values($projects);
     }
 
+    public function getProject()
+    {
+        $projectId = $this->attributes['project_id'];
+        $project = ProjectModel::find($projectId)->toArray();
+        $project = $this->convertTime([$project]);
+        return array_shift($project);
+    }
+
+    public function convertTime($projects) {
+        foreach ($projects as &$project) {
+            $project['project_dev_deadline'] = date('d.m.Y', strtotime($project['project_dev_deadline']));
+            $project['project_dev_start'] = date('d.m.Y', strtotime($project['project_dev_start']));
+        }
+        return $projects;
+    }
+
     public function getProjectTasksAttribute()
     {
         return TaskModel::where('task_project', $this->attributes['project_id'])->get()->all();
