@@ -146,6 +146,7 @@
 
         <div class="task-page__operators">
           <field-container
+          v-if="!isNewTask"
           title="Автор задачи"
           class="task-page__field">
             <field-input
@@ -253,6 +254,8 @@ import FieldTextarea from "../Fields/FieldTextarea";
 import FieldDatepicker from "../Fields/FieldDatepicker";
 
 import Modal from '../Modal';
+import { cloneDeep } from "lodash";
+import { format } from "date-fns";
 
 export default {
   name: "TaskPage",
@@ -266,7 +269,6 @@ export default {
     developers: { type: Array, default: () => [] },
     testers: { type: Array, default: () => [] },
     projects: { type: Array, default: () => [] },
-    isManager: { type: Boolean, default: () => false },
     isTaskOperator: { type: Boolean, default: () => false },
     isNewTask: { type: Boolean, default: () => false },
 
@@ -290,6 +292,9 @@ export default {
 
     async saveTask() {
       this.$store.state.isLoading = true;
+      if(this.isNewTask) {
+        this.taskData.task_created = format(new Date(), 'dd.MM.yyyy');
+      }
       const params = { ...this.taskData };
       const res = await this.$store.dispatch('fetchData', { url: '/tasks/save', params });
 
@@ -341,7 +346,7 @@ export default {
     },
 
     cancelChanges() {
-      this.taskData = this.isNewTask ? this.emptyTask : this.task;
+      this.taskData = this.isNewTask ? cloneDeep(this.emptyTask) : cloneDeep(this.task);
     },
 
     handleConfirmation() {
@@ -366,11 +371,13 @@ export default {
     taskAuthor() {
       const author = this.taskEmps.find(emp => emp.emp_position == 3);
       return author ? author.emp_fio : null;
-    }
+    },
+    isManager() {
+      return this.$store.getters.checkRole('manager');
+    },
   },
   created() {
-    if(this.isNewTask)
-      this.taskData = this.emptyTask;
+    this.taskData = this.isNewTask ? cloneDeep(this.emptyTask) : cloneDeep(this.taskData);
   }
 }
 </script>
@@ -553,7 +560,7 @@ export default {
     }
 
     &-title {
-      padding: 5px;
+
     }
 
     cursor: pointer;

@@ -4,7 +4,7 @@
       <div class="calendar__header">
 
         <span
-        @click="switchDate(1)"
+        @click="switchDate(-1)"
         name="action/dropdown"
         dir="left"
         v-text="'arrow_back'"
@@ -13,7 +13,7 @@
         <div class="calendar__title" @click="switchMode">{{title}}</div>
 
         <span
-        @click="switchDate(-1)"
+        @click="switchDate(1)"
         name="action/dropdown"
         dir="right"
         v-text="'arrow_forward'"

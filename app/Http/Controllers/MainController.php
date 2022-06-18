@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomerModel;
+use App\Models\PriorityModel;
+use App\Models\ProjectModel;
+use App\Models\SubdivisionModel;
 use App\Models\TaskModel;
 use App\Models\StatusModel;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -43,21 +48,38 @@ class MainController extends Controller
     }
 
     /**
-     * Главная страница
+     * Страница управления
      * @param Request $request
      * @return mixed
      */
-    public function getTasksPage(Request $request)
+    public function getManagementPage(Request $request)
     {
-        $taskModel = new TaskModel();
-        $tasks = $taskModel->getTasks();
+        $this->defaultView = 'management';
+        $subdivisionsModel = new SubdivisionModel();
+        $subdivisions = $subdivisionsModel->getSubdivisions();
+        $customersModel = new CustomerModel();
+        $customers = $customersModel->getCustomers();
+
+        $projectModel = new ProjectModel();
+        $projects = $projectModel->getProjects();
+
         $statusModel = new StatusModel();
         $statuses = $statusModel->getStatuses();
 
+        $priorityModel = new PriorityModel();
+        $priority = $priorityModel->getPriority();
+
+        $developers = User::getEmployeesByRole(2);
+        $testers = User::getEmployeesByRole(1);
+
         return $this->prepareResponse([
-            'tasks' => $tasks,
+            'projects' => $projects,
+            'subdivisions' => $subdivisions,
+            'customers' => $customers,
             'statuses' => $statuses,
-            'editable' => false,
+            'priority' => $priority,
+            'developers' => $developers,
+            'testers' => $testers,
         ]);
     }
 }

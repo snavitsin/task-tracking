@@ -79,6 +79,25 @@ class TasksController extends Controller
     }
 
     /**
+     * Главная страница
+     * @param Request $request
+     * @return mixed
+     */
+    public function getTasksPage(Request $request)
+    {
+        $taskModel = new TaskModel();
+        $tasks = $taskModel->getTasks();
+        $statusModel = new StatusModel();
+        $statuses = $statusModel->getStatuses();
+
+        return $this->prepareResponse([
+            'tasks' => $tasks,
+            'statuses' => $statuses,
+            'editable' => false,
+        ]);
+    }
+
+    /**
      * Страница создания новой задачи
      * @param Request $request
      * @return mixed
@@ -125,13 +144,20 @@ class TasksController extends Controller
             'task_desc',
             'task_status',
             'task_priority',
-            'task_created',
             'task_deadline',
             'task_project',
+            'task_dev',
+            'task_tester',
         ];
         $this->validatorRules = [
-            'status_id' => 'required|integer',
-            'task_id' => 'required|integer'
+            'task_status' => 'required|integer',
+            'task_id' => 'required|integer',
+            'task_title' => 'required|string',
+            'task_desc' => 'required|string',
+            'task_priority' => 'required|integer',
+            'task_project' => 'required|integer',
+            'task_dev' => 'required|integer',
+            'task_tester' => 'required|integer',
         ];
 
 

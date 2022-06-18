@@ -59,7 +59,7 @@
       </field-container>
     </div>
     <div
-    v-if="subdivData.subdiv_emps.length"
+    v-if="subdivData.subdiv_emps && subdivData.subdiv_emps.length"
     v-text="'Сотрудники подразделения'"
     class="subdivision-page__emps-title" />
     <div class="subdivision-page__content">
@@ -76,7 +76,7 @@
       </div>
     </div>
     <div
-    v-if="subdivData.subdiv_projects.length"
+    v-if="subdivData.subdiv_projects && subdivData.subdiv_projects.length"
     v-text="'Проекты подразделения'"
     class="subdivision-page__projects-title" />
     <div class="subdivision-page__content">
@@ -131,6 +131,7 @@ import FieldTextarea from "../Fields/FieldTextarea";
 import FieldDatepicker from "../Fields/FieldDatepicker";
 
 import Modal from '../Modal';
+import { cloneDeep } from "lodash";
 
 export default {
   name: "subdivisionPage",
@@ -235,6 +236,10 @@ export default {
       return this.isNewSubdiv === true ? 'Создать' : 'Сохранить';
     },
   },
+  created() {
+    if(this.isNewSubdiv)
+      this.subdivData = cloneDeep(this.emptySubdiv);
+  }
 }
 </script>
 

@@ -45,8 +45,8 @@ class CustomerModel extends Model
 
     public function getCustomers()
     {
-        $subdivs = SubdivisionModel::all()->toArray();
-        return array_values($subdivs);
+        $customers = CustomerModel::all()->toArray();
+        return array_values($customers);
     }
 
     public function getSubdivision()

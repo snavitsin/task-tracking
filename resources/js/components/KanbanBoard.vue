@@ -1,7 +1,7 @@
 <template>
   <div class="kanban-board">
     <div
-    v-text="'Kanban доска задач'"
+    v-text="title || 'Kanban доска задач'"
     class="kanban-board__title" />
 
     <div class="kanban-board__content">
@@ -24,17 +24,15 @@
             v-for="task in group.tasks"
             :key="task.task_id"
             class="kanban-board__task">
-              <div class="kanban-board__task-header">
-                <a
-                v-text="`#${task.task_id}`"
-                :href="getTaskUrl(task.task_id)"
-                target="_blank"
-                class="kanban-board__task-number" />
-                <div
-                v-text="task.task_priority_title"
-                :style="getPriorityStyle(task)"
-                class="kanban-board__task-priority" />
-              </div>
+              <div
+              v-text="task.task_priority_title"
+              :style="getPriorityStyle(task)"
+              class="kanban-board__task-priority" />
+              <a
+              v-text="getTaskUrlTitle(task)"
+              :href="getTaskUrl(task.task_id)"
+              target="_blank"
+              class="kanban-board__task-number" />
               <div
               v-text="task.task_title"
               class="kanban-board__task-title" />
@@ -77,6 +75,7 @@ export default {
   name: "KanbanBoard",
   components: { draggable, Modal },
   props: {
+    title: { type: String, default: () => 'Kanban доска задач' },
     tasks: { type: Array, default: () => [] },
     statuses: { type: Array, default: () => [] },
     editable: { type: Boolean, default: () => true },
@@ -178,6 +177,10 @@ export default {
       return `/tasks/${task_id}`;
     },
 
+    getTaskUrlTitle(task) {
+      return `${task.task_project_code}#${task.task_id}`;
+    },
+
     getPriorityStyle(task) {
       return task.task_priority_color ? `background-color: ${task.task_priority_color}` : null;
     }
@@ -251,17 +254,11 @@ export default {
   }
 
   &__task {
-    &-header {
-      display: flex;
-      justify-content: flex-start;
-
-      > * + * {
-        margin-left: 10px;
-      }
-    }
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;;
 
     &-priority {
-      //background-color: #f7f7f8;
       padding: 5px;
       border-radius: 5px;
     }

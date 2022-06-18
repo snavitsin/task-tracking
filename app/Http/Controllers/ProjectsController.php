@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PriorityModel;
 use App\Models\ProjectModel;
+use App\Models\StatusModel;
 use App\Models\SubdivisionModel;
 use App\Models\CustomerModel;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ProjectsController extends Controller
@@ -77,27 +80,39 @@ class ProjectsController extends Controller
             'project_id',
             'project_title',
             'project_desc',
+            'project_code',
             'project_customer',
-            'project_dev_deadline',
-            'project_dev_start',
             'project_subdiv',
+            'project_dev_start',
+            'project_dev_deadline',
         ];
         $this->validatorRules = [
-            'subdiv_id' => 'required|integer',
-            'subdiv_title' => 'required|string',
-            'subdiv_desc' => 'required|string',
+            'project_id' => 'nullable|integer',
+            'project_title' => 'required|string',
+            'project_desc' => 'required|string',
+            'project_code' => 'required|string',
+            'project_customer' => 'required|integer',
+            'project_subdiv' => 'required|integer',
+            'project_dev_start' => 'required|date_format:d.m.Y',
+            'project_dev_deadline' => 'required|date_format:d.m.Y|after_or_equal:project_dev_start',
+        ];
+
+        $this->validatorSpecialText =  [
+            'project_dev_deadline.after_or_equal' => 'Срок сдачи проекта не может быть раньше даты создания проекта',
         ];
 
         if (!$this->isValidRequest($request)) return ['status' => false, 'errors' => $this->latestValidationErrors];
 
         $params = $this->getParam($request);
-        $this->model = new SubdivisionModel($params);
-        $result = $this->model->updateSubdiv();
+        $this->model = new ProjectModel($params);
+        $result = $this->model->updateProject();
+
+        $successText = isset($params['task_id']) ? 'Проект успешно обновлен' : 'Проект успешно создан';
 
         return [
             'status' => $result,
             'type' => $result === true ? 'success' : 'error',
-            'message' => $result === true ? 'Подразделение успешно обновлено' : 'Произошла ошибка'
+            'message' => $result === true ? $successText : 'Произошла ошибка'
         ];
     }
 

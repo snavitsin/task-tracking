@@ -37,11 +37,25 @@ class ProjectModel extends Model
         'project_id',
         'project_title',
         'project_desc',
+        'project_code',
         'project_customer',
         'project_dev_deadline',
         'project_dev_start',
         'project_subdiv',
     ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        self::updating(function($model){
+            $model->formatDateTime();
+        });
+
+        static::saving(function($model) {
+            $model->formatDateTime();
+        });
+    }
 
     public function __construct($values = [])
     {
@@ -62,12 +76,38 @@ class ProjectModel extends Model
         return array_shift($project);
     }
 
+    public function updateProject()
+    {
+        $isNewProject = !isset($this->attributes['project_id']);
+        $result = null;
+        if($isNewProject) {
+            $project = new ProjectModel($this->attributes);
+            $result = $project->save();
+        }
+        else {
+            $project = ProjectModel::find($this->attributes['project_id']);
+            $result = null;
+
+            if ($project) {
+                $project->attributes = $this->attributes;
+                $result = $project->save();
+            }
+        }
+
+        return boolval($result);
+    }
+
     public function convertTime($projects) {
         foreach ($projects as &$project) {
             $project['project_dev_deadline'] = date('d.m.Y', strtotime($project['project_dev_deadline']));
             $project['project_dev_start'] = date('d.m.Y', strtotime($project['project_dev_start']));
         }
         return $projects;
+    }
+
+    public function formatDateTime() {
+        $this->attributes['project_dev_start'] = date('Y-m-d H:i:s', strtotime($this->attributes['project_dev_start']));
+        $this->attributes['project_dev_deadline'] = date('Y-m-d H:i:s', strtotime($this->attributes['project_dev_deadline']));
     }
 
     public function getProjectTasksAttribute()

@@ -4,10 +4,11 @@
     v-text="'Проект'"
     class="project-page__page-title" />
 
-    <div class="project-page__content">
+    <div
+    class="project-page__content">
       <div class="project-page__main">
         <div class="project-page__header">
-          <div class="project-page__task-title">
+          <div class="project-page__project-title">
             <field-container
             :is-required="true"
             :errors="veeErrors.collect('project_title')"
@@ -21,6 +22,19 @@
               maxlength="255"
               name="project_title" />
             </field-container>
+            <field-container
+            :is-required="true"
+            :errors="veeErrors.collect('project_code')"
+            title="Код проекта"
+            class="project-page__field project-page__code">
+              <field-input
+              v-model="projectData.project_code"
+              v-validate="'required'"
+              :isError="veeErrors.has('project_code')"
+              :data-vv-as="' '"
+              maxlength="255"
+              name="project_code" />
+            </field-container>
           </div>
           <div class="project-page__combos">
             <field-container
@@ -31,10 +45,12 @@
               <field-dropdown
               class="project-page__dropdown"
               v-model="projectData.project_subdiv"
+              v-validate="'required'"
               :data="subdivisions"
               :disabled="!isManager"
               searchable
               placeholder="Подразделение"
+              name="project_subdiv"
               value-name="subdiv_id"
               label-name="subdiv_title" />
             </field-container>
@@ -47,9 +63,11 @@
               <field-dropdown
               class="project-page__dropdown"
               v-model="projectData.project_customer"
+              v-validate="'required'"
               :data="customers"
-              :disabled="!isNewProject"
+              :disabled="!isNewProject && false"
               searchable
+              name="project_customer"
               placeholder="Заказчик"
               value-name="customer_id"
               label-name="customer_fio" />
@@ -81,6 +99,7 @@
           class="report-answer-quality__field">
             <field-textarea
             v-model="projectData.project_desc"
+            v-validate="'required'"
             :data-vv-as="' '"
             :is-error="veeErrors.has('project_desc')"
             :disabled="!editable"
@@ -89,34 +108,6 @@
             max="300"
             class="project-page__textarea"/>
           </field-container>
-        </div>
-        <div
-        v-if="projectData.project_tasks.length"
-        class="project-page__tasks">
-          <div
-          v-text="'Задачи'"
-          class="project-page__tasks-title" />
-          <div class="project-page__tasks-content">
-            <div
-            v-for="task in projectData.project_tasks"
-            :key="task.task_id"
-            class="project-page__task">
-              <div class="project-page__task-header">
-                <a
-                v-text="`#${task.task_id}`"
-                :href="getTaskUrl(task.task_id)"
-                target="_blank"
-                class="project-page__task-number" />
-                <div
-                v-text="task.task_priority_title"
-                :style="getPriorityStyle(task)"
-                class="project-page__task-priority" />
-              </div>
-              <div
-              v-text="task.task_title"
-              class="project-page__task-title" />
-            </div>
-          </div>
         </div>
       </div>
 
@@ -131,6 +122,7 @@
           v-validate="'required'"
           :data-vv-as="'Дата начала разработки'"
           formatter="dd.MM.yyyy"
+          name="project_dev_start"
           readonly
           :disabled="true" />
         </field-container>
@@ -145,10 +137,18 @@
           v-validate="'required'"
           :data-vv-as="'Срок выполнения'"
           formatter="dd.MM.yyyy"
+          name="project_dev_deadline"
           :readonly="isManager"/>
         </field-container>
       </div>
     </div>
+
+    <kanban-board
+    v-if="projectData.project_tasks && projectData.project_tasks.length"
+    :tasks="projectData.project_tasks"
+    :title="'Kanban доска задач проекта'"
+    :statuses="statuses"
+    :editable="false" />
 
     <modal
     v-if="isConfirmModalShown"
@@ -182,14 +182,19 @@ import FieldInput from "../Fields/FieldInput";
 import FieldTextarea from "../Fields/FieldTextarea";
 import FieldDatepicker from "../Fields/FieldDatepicker";
 
+import { every } from 'lodash';
+
 import Modal from '../Modal';
+import KanbanBoard from '../KanbanBoard';
+import {format} from "date-fns";
 
 export default {
   name: "ProjectPage",
-  components: { Modal, FieldContainer, FieldDropdown, FieldInput, FieldTextarea, FieldDatepicker },
+  components: { Modal, FieldContainer, FieldDropdown, FieldInput, FieldTextarea, FieldDatepicker, KanbanBoard },
   props: {
     project: { type: Object, default: () => {} },
     customers: { type: Array, default: () => [] },
+    statuses: { type: Array, default: () => [] },
     subdivisions: { type: Array, default: () => [] },
     isNewProject: { type: Boolean, default: () => false },
   },
@@ -201,13 +206,24 @@ export default {
       isConfirmModalShown: false,
       emptyProject: {
         project_title: 'Новый проект',
-        project_desc: 'Описание'
+        project_code: 'project_code',
+        project_desc: 'Описание',
       }
     }
   },
   methods: {
 
     async saveProject() {
+      const hasNoErrors = await this.$validator.validateAll();
+      if (!hasNoErrors) {
+        this.$notify({ type: 'error', text: 'Не все поля заполнены верно' });
+        return;
+      }
+
+      if(this.isNewProject) {
+        this.projectData.project_dev_start = format(new Date(), 'dd.MM.yyyy');
+      }
+
       this.$store.state.isLoading = true;
       const params = { ...this.projectData };
       const res = await this.$store.dispatch('fetchData', { url: '/projects/save', params });
@@ -281,6 +297,9 @@ export default {
 
   },
   computed: {
+    isButtonDisabled() {
+      return every(this.veeFields, {dirty: false});
+    },
     isManager() {
       return this.$store.getters.checkRole('manager');
     },
@@ -306,7 +325,7 @@ export default {
 .project-page {
 
   --accent-color: #906fe9;
-
+  --input-height: 60px;
 
   > * + * {
     margin-top: 20px;
@@ -339,7 +358,7 @@ export default {
   }
 
   &__title {
-    --input-height: 60px;
+
   }
 
   &__controls {
@@ -370,6 +389,16 @@ export default {
 
   &__project {
 
+    &-title {
+      display: flex;
+      margin-left: -10px;
+      margin-right: -10px;
+
+      > * {
+        flex: 1 1 auto;
+        margin: 10px;
+      }
+    }
   }
 
   &__operators {

@@ -1,6 +1,9 @@
 <?php
 $attrs = [
     'project' => isset($project) ? $project : null,
+    'subdivisions' => isset($subdivisions) ? $subdivisions : null,
+    'customers' => isset($customers) ? $customers : null,
+    'statuses' => isset($statuses) ? $statuses : null,
 ];
 ?>
 

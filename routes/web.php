@@ -18,6 +18,7 @@ Route::post('login', [App\Http\Controllers\Auth\LoginController::class, 'login']
 
 Route::group(['middleware' => 'auth'], function(){
     Route::get('/', [App\Http\Controllers\MainController::class, 'getMainPage'])->name('getMainPage');
+    Route::get('/management', [App\Http\Controllers\MainController::class, 'getManagementPage'])->name('getManagementPage');
     Route::post('logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
     Route::group(['prefix' => 'subdivisions'], function ()
@@ -38,7 +39,7 @@ Route::group(['middleware' => 'auth'], function(){
 
     Route::group(['prefix' => 'tasks'], function () {
         Route::get('create', [App\Http\Controllers\TasksController::class, 'newTaskPage']);
-        Route::get('all', [App\Http\Controllers\MainController::class, 'getTasksPage'])->name('getTasksPage');
+        Route::get('all', [App\Http\Controllers\TasksController::class, 'getTasksPage'])->name('getTasksPage');
 
         Route::get('{id}', [App\Http\Controllers\TasksController::class, 'getTaskPage']);
 

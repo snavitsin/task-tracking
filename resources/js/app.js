@@ -35,6 +35,7 @@ Vue.component('main-page', require('./components/MainPage.vue').default);
 Vue.component('login-page', require('./components/Pages/LoginPage.vue').default);
 Vue.component('error-page', require('./components/Pages/ErrorPage.vue').default);
 Vue.component('task-page', require('./components/Pages/TaskPage.vue').default);
+Vue.component('management-page', require('./components/Pages/ManagementPage.vue').default);
 Vue.component('projects-page', require('./components/Pages/ProjectsPage.vue').default);
 Vue.component('project-page', require('./components/Pages/ProjectPage.vue').default);
 Vue.component('subdivisions-page', require('./components/Pages/SubdivisionsPage.vue').default);

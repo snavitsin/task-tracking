@@ -46,7 +46,7 @@ class TaskModel extends Model
         'emp_id',
     ];
 
-    protected $appends = ['task_priority_title', 'task_priority_color', 'task_project_title'];
+    protected $appends = ['task_priority_title', 'task_priority_color', 'task_project_title', 'task_project_code'];
 
     protected $operators = [
         'task_dev' => null,
@@ -58,6 +58,10 @@ class TaskModel extends Model
         parent::boot();
 
         self::updating(function($model){
+            $model->formatDateTime();
+        });
+
+        static::saving(function($model) {
             $model->formatDateTime();
         });
     }
@@ -118,9 +122,9 @@ class TaskModel extends Model
         $isNewTask = !isset($this->attributes['task_id']);
         $result = null;
         if($isNewTask) {
-            $task = new TaskModel();
-            $task->attributes = $this->attributes;
+            $task = new TaskModel($this->attributes);
             $result = $task->save();
+            if($result) $this->attributes['task_id'] = $task->attributes['task_id'];
         }
         else {
             $taskId = $this->attributes['task_id'];
@@ -132,7 +136,7 @@ class TaskModel extends Model
             }
         }
 
-        $result &= $this->updateTaskOperators();
+        if($result) $result &= $this->updateTaskOperators();
 
         return boolval($result);
     }
@@ -265,5 +269,12 @@ class TaskModel extends Model
         $projectId = $this->attributes['task_project'];
         $project = ProjectModel::find($projectId)->toArray();
         return $project['project_title'];
+    }
+
+    public function getTaskProjectCodeAttribute()
+    {
+        $projectId = $this->attributes['task_project'];
+        $project = ProjectModel::find($projectId)->toArray();
+        return $project['project_code'];
     }
 }
