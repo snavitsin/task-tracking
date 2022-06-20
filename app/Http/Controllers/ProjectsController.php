@@ -133,8 +133,9 @@ class ProjectsController extends Controller
         if (!$this->isValidRequest($request)) return ['status' => false, 'errors' => $this->latestValidationErrors];
 
         $params = $this->getParam($request);
-        $project = ProjectModel::find($params['project_id'])->toArray();
-        if(count($project['project_tasks']) > 0) {
+        $project = ProjectModel::find($params['project_id']);
+        $attrs = $project->toArray();
+        if(count($attrs['project_tasks']) > 0) {
             return [
                 'status' => false,
                 'type' => 'error',

@@ -285,7 +285,7 @@ export default {
       emptyTask: {
         task_title: 'Новая задача',
         task_desc: 'Описание'
-      }
+      },
     }
   },
   methods: {

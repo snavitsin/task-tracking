@@ -59,7 +59,7 @@ class TasksController extends Controller
         $projects = $projectModel->getProjects();
 
         $developers = User::getEmployeesByRole(2);
-        $testers = User::getEmployeesByRole(1);
+        $testers = User::getEmployeesByRole(3);
 
         $response = [
             'task' => $task,
@@ -116,7 +116,7 @@ class TasksController extends Controller
         $projects = $projectModel->getProjects();
 
         $developers = User::getEmployeesByRole(2);
-        $testers = User::getEmployeesByRole(1);
+        $testers = User::getEmployeesByRole(3);
 
         $response = [
             'priority' => $priority,

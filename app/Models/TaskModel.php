@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TaskModel extends Model
@@ -136,7 +137,7 @@ class TaskModel extends Model
             }
         }
 
-        if($result) $result &= $this->updateTaskOperators();
+        if($result) $result &= $this->updateTaskOperators($isNewTask);
 
         return boolval($result);
     }
@@ -155,7 +156,7 @@ class TaskModel extends Model
         return $tasks;
     }
 
-    public function updateTaskOperators() {
+    public function updateTaskOperators($isNewTask) {
         $taskId = $this->attributes['task_id'];
         $taskDev = $this->operators['task_dev'];
         $taskDevRef = RefTaskEmpModel::where([
@@ -183,7 +184,7 @@ class TaskModel extends Model
         $taskTester = $this->operators['task_tester'];
         $taskTesterRef = RefTaskEmpModel::where([
             ['ref_task_emp_task', '=', $taskId],
-            ['ref_task_emp_role', '=', 1],
+            ['ref_task_emp_role', '=', 3],
         ])->first();
 
         if($taskTesterRef) {
@@ -198,9 +199,18 @@ class TaskModel extends Model
             $taskTesterRef = new RefTaskEmpModel([
                 'ref_task_emp_task' => $taskId,
                 'ref_task_emp_emp' => $taskTester,
-                'ref_task_emp_role' => 1,
+                'ref_task_emp_role' => 3,
             ]);
             $result &= $taskTesterRef->save();
+        }
+
+        if($isNewTask) {
+            $taskAuthorRef = new RefTaskEmpModel([
+                'ref_task_emp_task' => $taskId,
+                'ref_task_emp_emp' => Auth::user()->getUserId(),
+                'ref_task_emp_role' => 1,
+            ]);
+            $result &= $taskAuthorRef->save();
         }
 
         return $result;

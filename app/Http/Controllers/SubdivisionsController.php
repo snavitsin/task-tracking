@@ -77,7 +77,7 @@ class SubdivisionsController extends Controller
             'subdiv_desc',
         ];
         $this->validatorRules = [
-            'subdiv_id' => 'required|integer',
+            'subdiv_id' => 'nullable|integer',
             'subdiv_title' => 'required|string',
             'subdiv_desc' => 'required|string',
         ];
@@ -88,10 +88,12 @@ class SubdivisionsController extends Controller
         $this->model = new SubdivisionModel($params);
         $result = $this->model->updateSubdiv();
 
+        $successText = isset($params['subdiv_id']) ? 'Подразделение успешно обновлено' : 'Подразделение успешно создано';
+
         return [
             'status' => $result,
             'type' => $result === true ? 'success' : 'error',
-            'message' => $result === true ? 'Подразделение успешно обновлено' : 'Произошла ошибка'
+            'message' => $result === true ? $successText : 'Произошла ошибка'
         ];
     }
 
@@ -112,8 +114,9 @@ class SubdivisionsController extends Controller
         if (!$this->isValidRequest($request)) return ['status' => false, 'errors' => $this->latestValidationErrors];
 
         $params = $this->getParam($request);
-        $subdiv = SubdivisionModel::find($params['subdiv_id'])->toArray();
-        if(count($subdiv['subdiv_emps']) > 0) {
+        $subdiv = SubdivisionModel::find($params['subdiv_id']);
+        $attrs = $subdiv->toArray();
+        if(count($attrs['subdiv_emps']) > 0) {
             return [
                 'status' => false,
                 'type' => 'error',

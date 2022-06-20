@@ -25,6 +25,7 @@ class CustomerModel extends Model
      */
     protected $primaryKey = 'customer_id';
 
+    protected $appends = ['customer_projects'];
 
     /**
      * The attributes that are mass assignable.
@@ -49,27 +50,41 @@ class CustomerModel extends Model
         return array_values($customers);
     }
 
-    public function getSubdivision()
+    public function getCustomer()
     {
-        $subdivId = $this->attributes['subdiv_id'];
-        return SubdivisionModel::find($subdivId)->toArray();
+        $customerId = $this->attributes['customer_id'];
+        return CustomerModel::find($customerId)->toArray();
     }
 
-    public function updateSubdiv()
+    public function updateCustomer()
     {
-        $subdivId = $this->attributes['subdiv_id'];
-        $subdiv = SubdivisionModel::find($subdivId);
+        $isNewCustomer = !isset($this->attributes['customer_id']);
         $result = null;
-        if ($subdiv) {
-            $subdiv->attributes = $this->attributes;
-            $result = $subdiv->save();
+        if($isNewCustomer) {
+            $customer = new CustomerModel($this->attributes);
+            $result = $customer->save();
         }
-        return $result;
+        else {
+            $customer = CustomerModel::find($this->attributes['customer_id']);
+            $result = null;
+
+            if ($customer) {
+                $customer->attributes = $this->attributes;
+                $result = $customer->save();
+            }
+        }
+
+        return boolval($result);
     }
 
-    public function deleteSubdiv() {
-        $subdivId = $this->attributes['subdiv_id'];
-        $task = SubdivisionModel::find($subdivId);
-        return $task->delete();
+    public function deleteCustomer() {
+        $customerId = $this->attributes['customer_id'];
+        $customer = CustomerModel::find($customerId);
+        return $customer->delete();
+    }
+
+    public function getCustomerProjectsAttribute()
+    {
+        return ProjectModel::where('project_customer', $this->attributes['customer_id'])->get()->all();
     }
 }

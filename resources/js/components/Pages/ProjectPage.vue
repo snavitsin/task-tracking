@@ -391,8 +391,7 @@ export default {
 
     &-title {
       display: flex;
-      margin-left: -10px;
-      margin-right: -10px;
+      margin: -10px;
 
       > * {
         flex: 1 1 auto;

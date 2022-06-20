@@ -33,6 +33,10 @@
         <subdivision-page
         :is-new-subdiv="true"/>
       </template>
+      <template v-else-if="selectedTab === 4">
+        <customer-page
+        :is-new-customer="true"/>
+      </template>
 
       </div>
 
@@ -46,10 +50,11 @@ import Tabs from '../Tabs';
 import ProjectPage from './ProjectPage';
 import TaskPage from './TaskPage';
 import SubdivisionPage from './SubdivisionPage';
+import CustomerPage from './CustomerPage';
 
 export default {
   name: "ManagementPage",
-  components: { Modal, ProjectPage, TaskPage, SubdivisionPage, Tabs },
+  components: { Modal, ProjectPage, TaskPage, SubdivisionPage, CustomerPage, Tabs },
   props: {
     project: { type: Object, default: () => {} },
     customers: { type: Array, default: () => [] },
@@ -75,7 +80,7 @@ export default {
         { 'tab_id': 1, 'tab_title': 'Новая задача' },
         { 'tab_id': 2, 'tab_title': 'Новый проект' }
       ];
-      if(this.$store.getters.checkRole('manager')) {
+      if(this.$store.getters.checkRole('chief')) {
         tabs = tabs.concat([
           { 'tab_id': 3, 'tab_title': 'Новое подразделение' },
           { 'tab_id': 4, 'tab_title': 'Новый заказчик' },

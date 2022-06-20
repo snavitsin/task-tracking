@@ -58,20 +58,29 @@ class SubdivisionModel extends Model
 
     public function updateSubdiv()
     {
-        $subdivId = $this->attributes['subdiv_id'];
-        $subdiv = SubdivisionModel::find($subdivId);
+        $isNewSubdiv = !isset($this->attributes['subdiv_id']);
         $result = null;
-        if ($subdiv) {
-            $subdiv->attributes = $this->attributes;
+        if($isNewSubdiv) {
+            $subdiv = new SubdivisionModel($this->attributes);
             $result = $subdiv->save();
         }
-        return $result;
+        else {
+            $subdiv = SubdivisionModel::find($this->attributes['subdiv_id']);
+            $result = null;
+
+            if ($subdiv) {
+                $subdiv->attributes = $this->attributes;
+                $result = $subdiv->save();
+            }
+        }
+
+        return boolval($result);
     }
 
     public function deleteSubdiv() {
         $subdivId = $this->attributes['subdiv_id'];
-        $task = SubdivisionModel::find($subdivId);
-        return $task->delete();
+        $subdiv = SubdivisionModel::find($subdivId);
+        return $subdiv->delete();
     }
 
     public function getSubdivEmpsAttribute()

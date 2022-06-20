@@ -57,9 +57,9 @@ class User extends Authenticatable
 
     protected $appends = ['emp_fio', 'emp_position_title'];
 
-    protected $testerId = 1;
+    protected $testerId = 3;
     protected $developerId = 2;
-    protected $managerId = 3;
+    protected $managerId = 1;
 
     /**
      * Get the password for the user.

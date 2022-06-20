@@ -1,87 +1,89 @@
 <template>
-  <div class="subdivision-page">
+  <div class="customer-page">
 
     <div
-    v-text="'Подразделение'"
-    class="subdivision-page__title" />
+    v-text="'Заказчик'"
+    class="customer-page__title" />
 
-    <div class="subdivision-page__fields">
-
-      <div class="subdivision-page__fields-header">
-        <field-container
-        :is-required="true"
-        :errors="veeErrors.collect('subdiv_title')"
-        title="Название"
-        class="subdivision-page__field">
-          <field-input
-          v-model="subdivData.subdiv_title"
-          v-validate="'required'"
-          :isError="veeErrors.has('subdiv_title')"
-          :data-vv-as="' '"
-          :disabled="!editable"
-          maxlength="255"
-          name="subdiv_title" />
-        </field-container>
+    <div
+    class="project-page__content">
+      <div class="project-page__main">
+        <div class="project-page__header">
+          <div class="project-page__project-title">
+            <field-container
+            :is-required="true"
+            :errors="veeErrors.collect('customer_fio')"
+            title="ФИО"
+            class="customer-page__field">
+              <field-input
+              v-model="customerData.customer_fio"
+              v-validate="'required'"
+              :isError="veeErrors.has('customer_fio')"
+              :data-vv-as="' '"
+              :disabled="!editable"
+              maxlength="255"
+              name="customer_fio" />
+            </field-container>
+            <field-container
+            :is-required="true"
+            :errors="veeErrors.collect('customer_email')"
+            title="Email"
+            class="customer-page__field">
+              <field-input
+              v-model="customerData.customer_email"
+              v-validate="'required|email'"
+              :isError="veeErrors.has('customer_email')"
+              :data-vv-as="' '"
+              :disabled="!editable"
+              maxlength="255"
+              placeholder="Email"
+              name="customer_email" />
+            </field-container>
+            <field-container
+            :is-required="true"
+            :errors="veeErrors.collect('customer_phone')"
+            title="Телефон"
+            class="customer-page__field">
+              <field-input
+              v-model="customerData.customer_phone"
+              v-validate="{ required: true, regex: /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/ }"
+              :isError="veeErrors.has('customer_phone')"
+              :mask="{ value: '+7 (999) 999-99-99' }"
+              placeholder="+7 (___) ___-__-__"
+              :data-vv-as="' '"
+              :disabled="!editable"
+              maxlength="255"
+              name="customer_phone" />
+            </field-container>
+          </div>
+        </div>
 
         <div
-        v-if="editable"
-        class="subdivision-page__controls">
+        class="project-page__controls">
           <button
-          @click="saveSubdiv"
+          @click="saveCustomer"
           v-text="saveButtonText"
-          class="button button--positive subdivision-page__control"/>
+          class="button button--positive customer-page__control"/>
           <button
           @click="cancelChanges"
           v-text="'Отменить изменения'"
-          class="button button--neutral subdivision-page__control"/>
+          class="button button--neutral customer-page__control"/>
           <button
-          v-if="!isNewSubdiv"
+          v-if="!isNewCustomer"
           @click="isConfirmModalShown = true"
           v-text="'Удалить'"
-          class="button button--negative subdivision-page__control"/>
+          class="button button--negative customer-page__control"/>
         </div>
       </div>
+    </div>
 
-      <field-container
-      :is-required="true"
-      :errors="veeErrors.collect('subdiv_desc')"
-      title="Описание"
-      class="subdivision-page__field">
-        <field-textarea
-        v-model="subdivData.subdiv_desc"
-        :data-vv-as="' '"
-        :is-error="veeErrors.has('subdiv_desc')"
-        :disabled="!editable"
-        placeholder="Описание"
-        name="subdiv_desc"
-        max="300"
-        class="subdivision-page__textarea"/>
-      </field-container>
-    </div>
     <div
-    v-if="subdivData.subdiv_emps && subdivData.subdiv_emps.length"
-    v-text="'Сотрудники подразделения'"
-    class="subdivision-page__emps-title" />
-    <div class="subdivision-page__content">
-      <div
-      v-for="emp in subdivData.subdiv_emps"
-      :key="emp.emp_id"
-      class="subdivision-page__emp">
-        <div
-        v-text="emp.emp_fio"
-        class="subdivision-page__emp-fio" />
-        <div
-        v-text="emp.emp_position_title"
-        class="subdivision-page__emp-position" />
-      </div>
-    </div>
-    <div
-    v-if="subdivData.subdiv_projects && subdivData.subdiv_projects.length"
-    v-text="'Проекты подразделения'"
+    v-if="customerData.customer_projects && customerData.customer_projects.length"
+    v-text="'Проекты заказчика'"
     class="subdivision-page__projects-title" />
     <div class="subdivision-page__content">
       <div
-      v-for="project in subdivData.subdiv_projects"
+      v-for="project in customerData.customer_projects"
       :key="project.project_id"
       class="subdivision-page__project">
         <div class="subdivision-page__project-title">
@@ -91,31 +93,27 @@
           target="_blank"
           class="subdivision-page__project-link" />
         </div>
-        <div
-        v-if="false"
-        v-text="emp.emp_position_title"
-        class="subdivision-page__emp-position" />
       </div>
     </div>
 
     <modal
     v-if="isConfirmModalShown"
     @modal:close="isConfirmModalShown = false"
-    class="subdivision-page__modal">
+    class="customer-page__modal">
       <div
-      v-text="'Вы уверены, что хотите удалить подразделение?'"
-      class="subdivision-page__modal-text"/>
+      v-text="'Вы уверены, что хотите удалить заказчика?'"
+      class="customer-page__modal-text"/>
 
       <template #buttons>
-        <div class="subdivision-page__modal-controls">
+        <div class="customer-page__modal-controls">
           <button
           v-text="'Удалить'"
           @click="handleConfirmation()"
-          class="button button--negative subdivision-page__button"/>
+          class="button button--negative customer-page__button"/>
           <button
           v-text="'Отмена'"
           @click="handleCancel()"
-          class="button button--neutral subdivision-page__button"/>
+          class="button button--neutral customer-page__button"/>
         </div>
       </template>
     </modal>
@@ -134,39 +132,32 @@ import Modal from '../Modal';
 import { cloneDeep } from "lodash";
 
 export default {
-  name: "subdivisionPage",
+  name: "CustomerPage",
   components: { Modal, FieldContainer, FieldDropdown, FieldInput, FieldTextarea, FieldDatepicker },
   props: {
-    subdiv: { type: Object, default: () => {} },
-    isNewSubdiv: { type: Boolean, default: () => false },
+    customer: { type: Object, default: () => {} },
+    isNewCustomer: { type: Boolean, default: () => false },
   },
   data() {
     return {
-      subdivData: this.subdiv,
+      customerData: this.customer,
       isConfirmModalShown: false,
-      emptySubdiv: {
-        subdiv_title: 'Новое подразделение',
-        subdiv_desc: 'Описание'
+      emptyCustomer: {
+        customer_fio: 'Иван Иванович Иванов',
+        customer_email: 'mail@example.ru',
+        customer_phone: '+7 (999) 999-99-99',
       },
     }
   },
   methods: {
-    getSubdivCountText(subdiv) {
-      return `Сотрудники: ${subdiv.subdiv_emps.length}`;
-    },
-
-    getSubdivUrl(subdiv) {
-      return `/subdivision/${subdiv.subdiv_id}`;
-    },
-
     getProjectUrl(project) {
       return `/projects/${project.project_id}`;
     },
 
-    async saveSubdiv() {
+    async saveCustomer() {
       this.$store.state.isLoading = true;
-      const params = { ...this.subdivData };
-      const res = await this.$store.dispatch('fetchData', { url: '/subdivisions/save', params });
+      const params = { ...this.customerData };
+      const res = await this.$store.dispatch('fetchData', { url: '/customers/save', params });
 
       if(res?.errors) {
         const self = this;
@@ -181,17 +172,13 @@ export default {
           type: res.type,
           text: res.message
         });
-
-        if(res.status === true) {
-          //await this.getTasks();
-        }
       }
       this.$store.state.isLoading = false;
     },
-    async deleteSubdiv() {
+    async deleteCustomer() {
       this.$store.state.isLoading = true;
-      const params = { subdiv_id: this.subdivData.subdiv_id };
-      const res = await this.$store.dispatch('fetchData', { url: '/subdivisions/delete', params });
+      const params = { customer_id: this.customerData.customer_id };
+      const res = await this.$store.dispatch('fetchData', { url: '/customers/delete', params });
 
       if(res?.errors) {
         const self = this;
@@ -208,7 +195,7 @@ export default {
         });
 
         if(res.status === true) {
-          window.location.href = `/subdivisions/`;
+          window.location.href = `/customers/`;
         }
       }
       this.$store.state.isLoading = false;
@@ -216,11 +203,11 @@ export default {
 
 
     cancelChanges() {
-      this.subdivData = this.isNewSubdiv ? this.emptySubdiv : this.subdiv;
+      this.customerData = this.isNewCustomer ? this.emptyCustomer : this.customer;
     },
 
     handleConfirmation() {
-      this.deleteSubdiv();
+      this.deleteCustomer();
       this.isConfirmModalShown = false;
     },
     handleCancel() {
@@ -233,29 +220,32 @@ export default {
       return this.$store.getters.checkRole('manager');
     },
     saveButtonText() {
-      return this.isNewSubdiv === true ? 'Создать' : 'Сохранить';
+      return this.isNewCustomer === true ? 'Создать' : 'Сохранить';
     },
   },
   created() {
-    if(this.isNewSubdiv)
-      this.subdivData = cloneDeep(this.emptySubdiv);
+    if(this.isNewCustomer)
+      this.customerData = cloneDeep(this.emptyCustomer);
   }
 }
 </script>
 
 <style lang="scss">
-.subdivision-page {
+.customer-page {
 
   --accent-color: #906fe9;
-  --input-height: 60px;
 
   > * + * {
     margin-top: 20px;
   }
 
   &__fields {
-    > * + * {
-      margin-top: 20px;
+    display: flex;
+    margin: -10px;
+
+    > * {
+      flex: 1 1 auto;
+      margin: 10px;
     }
   }
 
@@ -273,10 +263,10 @@ export default {
   }
 
   &__content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 400px));
-    grid-auto-rows: 1fr;
-    gap: 20px;
+
+    > * + * {
+      margin-top: 20px;
+    }
   }
 
   &__emp {

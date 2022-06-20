@@ -112,6 +112,12 @@ export default {
           { 'title': 'Статистка', 'link': '/statistics' },
         ]);
       }
+      if(this.$store.getters.checkRole('chief')) {
+        links = links.concat([
+          { 'title': 'Заказчики', 'link': '/customers' },
+          { 'title': 'Сотрудники', 'link': '/employees' },
+        ]);
+      }
       return links;
     }
   }

@@ -29,6 +29,14 @@ Route::group(['middleware' => 'auth'], function(){
         Route::post('delete', [App\Http\Controllers\SubdivisionsController::class, 'deleteSubdiv']);
     });
 
+    Route::group(['prefix' => 'customers'], function ()
+    {
+        Route::get('/', [App\Http\Controllers\CustomersController::class, 'getCustomersPage']);
+        Route::get('{id}', [App\Http\Controllers\CustomersController::class, 'getCustomerPage']);
+        Route::post('save', [App\Http\Controllers\CustomersController::class, 'updateCustomer']);
+        Route::post('delete', [App\Http\Controllers\CustomersController::class, 'deleteCustomer']);
+    });
+
     Route::group(['prefix' => 'projects'], function ()
     {
         Route::get('/', [App\Http\Controllers\ProjectsController::class, 'getProjectsPage']);

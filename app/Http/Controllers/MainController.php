@@ -70,7 +70,7 @@ class MainController extends Controller
         $priority = $priorityModel->getPriority();
 
         $developers = User::getEmployeesByRole(2);
-        $testers = User::getEmployeesByRole(1);
+        $testers = User::getEmployeesByRole(3);
 
         return $this->prepareResponse([
             'projects' => $projects,
