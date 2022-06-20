@@ -47,7 +47,10 @@ class TaskModel extends Model
         'emp_id',
     ];
 
-    protected $appends = ['task_priority_title', 'task_priority_color', 'task_project_title', 'task_project_code'];
+    protected $appends = [
+        'task_priority_title', 'task_priority_color', 'task_project_title',
+        'task_project_code', 'task_project_color', 'task_overdue',
+    ];
 
     protected $operators = [
         'task_dev' => null,
@@ -286,5 +289,20 @@ class TaskModel extends Model
         $projectId = $this->attributes['task_project'];
         $project = ProjectModel::find($projectId)->toArray();
         return $project['project_code'];
+    }
+
+    public function getTaskProjectColorAttribute()
+    {
+        $projectId = $this->attributes['task_project'];
+        $project = ProjectModel::find($projectId)->toArray();
+        return $project['project_color'];
+    }
+
+    public function getTaskOverdueAttribute()
+    {
+        $deadline = strtotime($this->attributes['task_deadline']);
+        $nowTime = strtotime('now');
+        $notCompleted = $this->attributes['task_status'] !== 3;
+        return $nowTime > $deadline && $notCompleted;
     }
 }

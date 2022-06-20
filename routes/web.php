@@ -67,6 +67,13 @@ Route::group(['middleware' => 'auth'], function(){
         Route::post('delete', [App\Http\Controllers\TasksController::class, 'deleteTask']);
     });
 
+    Route::group(['prefix' => 'statistics'], function ()
+    {
+        Route::get('/', [App\Http\Controllers\StatisticsController::class, 'getStatPage']);
+        Route::get('project/{id}', [App\Http\Controllers\StatisticsController::class, 'getProjectStat']);
+        Route::get('emp/{id}', [App\Http\Controllers\StatisticsController::class, 'getEmpStat']);
+    });
+
 //    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 //
 //    Route::post('/home/tasks', [App\Http\Controllers\HomeController::class, 'getTasks'])->name('tasks');

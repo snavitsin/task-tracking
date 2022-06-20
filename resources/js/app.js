@@ -44,6 +44,7 @@ Vue.component('customer-page', require('./components/Pages/CustomerPage.vue').de
 Vue.component('customers-page', require('./components/Pages/CustomersPage.vue').default);
 Vue.component('employee-page', require('./components/Pages/EmployeePage.vue').default);
 Vue.component('employees-page', require('./components/Pages/EmployeesPage.vue').default);
+Vue.component('statistics-page', require('./components/Pages/StatisticsPage.vue').default);
 Vue.component('app', require('./components/App.vue').default);
 
 Vue.component('modal', require('./components/Modal.vue').default);

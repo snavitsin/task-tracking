@@ -23,6 +23,7 @@
             <div
             v-for="task in group.tasks"
             :key="task.task_id"
+            :class="{'kanban-board__task--overdue': task.task_overdue === true}"
             class="kanban-board__task">
               <div
               v-text="task.task_priority_title"
@@ -32,6 +33,7 @@
               v-text="getTaskUrlTitle(task)"
               :href="getTaskUrl(task.task_id)"
               target="_blank"
+              :style="getNumberStyle(task)"
               class="kanban-board__task-number" />
               <div
               v-text="task.task_title"
@@ -187,6 +189,10 @@ export default {
 
     getPriorityStyle(task) {
       return task.task_priority_color ? `background-color: ${task.task_priority_color}` : null;
+    },
+
+    getNumberStyle(task) {
+      return task.task_project_color ? `background-color: ${task.task_project_color}` : null;
     }
 
   },
@@ -219,7 +225,7 @@ export default {
 
   &__content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 190px);
+    grid-template-columns: repeat(auto-fit, 194px);
     grid-auto-rows: 1fr;
     gap: 20px;
   }
@@ -268,8 +274,7 @@ export default {
     }
 
     &-number {
-      color: #1fe09e;
-      background-color: #f7f7f8;
+      color: #fff;
       padding: 5px;
       border-radius: 5px;
 
@@ -292,6 +297,11 @@ export default {
     background: linear-gradient(180deg, rgba(144,111,233,0.3) 0%, rgba(231,222,249,1) 100%);
     padding: 10px;
     border-radius: 5px;
+
+    &--overdue {
+      background: none;
+      background-color: #eb3d00;
+    }
 
     > * + * {
       margin-top: 10px;
