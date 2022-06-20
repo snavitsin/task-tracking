@@ -34,11 +34,10 @@
               type="number"
               name="project_id" />
             </field-container>
-
-
           </div>
           <div class="statistics-page__controls">
             <a
+            v-show="selectedProject"
             v-text="'Экспорт'"
             :href="projectStatUrl"
             target="_blank"
@@ -60,9 +59,9 @@
               <field-dropdown
               class="task-page__dropdown"
               v-model="selectedEmp"
-              :data="employees"
+              :data="emps"
               searchable
-              placeholder="Проект"
+              placeholder="Сотрудник"
               value-name="emp_id"
               label-name="emp_fio" />
             </field-container>
@@ -81,6 +80,7 @@
           </div>
           <div class="statistics-page__controls">
             <a
+            v-show="selectedEmp"
             v-text="'Экспорт'"
             :href="empStatUrl"
             target="_blank"
@@ -106,7 +106,7 @@ export default {
   name: "ManagementPage",
   components: { Modal, FieldContainer, FieldDropdown, FieldInput },
   props: {
-    employees: { type: Array, default: () => [] },
+    emps: { type: Array, default: () => [] },
     projects: { type: Array, default: () => [] },
   },
   data() {

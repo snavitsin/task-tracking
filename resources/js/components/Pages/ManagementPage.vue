@@ -84,7 +84,7 @@ export default {
         tabs = tabs.concat([
           { 'tab_id': 3, 'tab_title': 'Новое подразделение' },
           { 'tab_id': 4, 'tab_title': 'Новый заказчик' },
-          { 'tab_id': 5, 'tab_title': 'Роли пользователей' },
+          //{ 'tab_id': 5, 'tab_title': 'Роли пользователей' },
         ]);
       }
       return tabs;

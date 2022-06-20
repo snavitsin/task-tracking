@@ -89,6 +89,7 @@ class TasksController extends Controller
         $tasks = $taskModel->getTasks();
         $statusModel = new StatusModel();
         $statuses = $statusModel->getStatuses();
+        $this->defaultView = 'main';
 
         return $this->prepareResponse([
             'tasks' => $tasks,
