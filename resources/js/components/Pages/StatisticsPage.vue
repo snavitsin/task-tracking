@@ -31,7 +31,7 @@
               <field-input
               v-model="selectedProject"
               :data-vv-as="' '"
-              readonly
+              type="number"
               name="project_id" />
             </field-container>
 
@@ -113,30 +113,44 @@ export default {
   &__stat {
 
     &-content {
-
+      > * + * {
+        margin-top: 20px;
+      }
     }
 
     &-fields {
       display: flex;
-      justify-content: space-between;
+      margin: -10px;
 
       > * {
         max-width: 300px;
         flex: 1 1 auto;
+        margin: 10px;
       }
+
     }
 
     &-controls {
 
     }
+
+    > * + * {
+      margin-top: 10px;
+    }
   }
 
   &__control {
     max-width: 200px;
+
+    &:hover {
+      color: #ccc;
+    }
   }
 
   &__subtitle {
-
+    font-weight: bold;
+    font-size: 20px;
+    color: #1fe09e;
   }
 
   &__header {
