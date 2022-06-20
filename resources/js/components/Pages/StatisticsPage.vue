@@ -47,6 +47,48 @@
         </div>
       </div>
 
+      <div class="statistics-page__stat">
+        <div
+        v-text="'Статистка сотрудника'"
+        class="statistics-page__subtitle" />
+
+        <div class="statistics-page__stat-content">
+          <div class="statistics-page__stat-fields">
+            <field-container
+            title="Сотрудник"
+            class="task-page__field">
+              <field-dropdown
+              class="task-page__dropdown"
+              v-model="selectedEmp"
+              :data="employees"
+              searchable
+              placeholder="Проект"
+              value-name="emp_id"
+              label-name="emp_fio" />
+            </field-container>
+
+            <field-container
+            title="ID сотрудника"
+            class="task-page__field">
+              <field-input
+              v-model="selectedEmp"
+              :data-vv-as="' '"
+              type="number"
+              name="project_id" />
+            </field-container>
+
+
+          </div>
+          <div class="statistics-page__controls">
+            <a
+            v-text="'Экспорт'"
+            :href="empStatUrl"
+            target="_blank"
+            class="button button--positive statistics-page__control"/>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </div>
@@ -81,6 +123,9 @@ export default {
   computed: {
     projectStatUrl() {
       return `/statistics/project/${this.selectedProject}`;
+    },
+    empStatUrl() {
+      return `/statistics/emp/${this.selectedEmp}`;
     }
   },
 }
