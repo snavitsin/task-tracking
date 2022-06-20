@@ -219,7 +219,7 @@ export default {
 
   &__content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 300px));
+    grid-template-columns: repeat(auto-fit, 190px);
     grid-auto-rows: 1fr;
     gap: 20px;
   }
