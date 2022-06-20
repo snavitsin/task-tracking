@@ -62,9 +62,13 @@ class ProjectsController extends Controller
         $customersModel = new CustomerModel();
         $customers = $customersModel->getCustomers();
 
+        $statusesModel = new StatusModel();
+        $statuses = $statusesModel->getStatuses();
+
         return $this->prepareResponse([
             'project' => $project,
             'customers' => $customers,
+            'statuses' => $statuses,
             'subdivisions' => $subdivisions,
         ]);
     }

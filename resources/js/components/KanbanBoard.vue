@@ -170,6 +170,10 @@ export default {
         });
       });
 
+      if(!this.editable) {
+        groups = groups.filter(group => group.tasks.length > 0);
+      }
+
       this.mappedTasks = groups;
     },
 
@@ -215,7 +219,7 @@ export default {
 
   &__content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(190px, 300px));
     grid-auto-rows: 1fr;
     gap: 20px;
   }

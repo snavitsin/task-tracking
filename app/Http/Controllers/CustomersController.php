@@ -73,7 +73,6 @@ class CustomersController extends Controller
             'customer_id' => 'nullable|integer',
             'customer_fio' => 'required|string',
             'customer_email' => 'required|unique:customers,customer_email|email',
-            'customer_phone' => ['required', 'regex:/^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/'],
         ];
 
         $params = $this->getParam($request);

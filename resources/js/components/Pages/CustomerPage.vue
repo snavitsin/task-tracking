@@ -234,6 +234,7 @@ export default {
 .customer-page {
 
   --accent-color: #906fe9;
+  --input-height: 60px;
 
   > * + * {
     margin-top: 20px;

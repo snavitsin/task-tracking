@@ -42,6 +42,8 @@ Vue.component('subdivisions-page', require('./components/Pages/SubdivisionsPage.
 Vue.component('subdivision-page', require('./components/Pages/SubdivisionPage.vue').default);
 Vue.component('customer-page', require('./components/Pages/CustomerPage.vue').default);
 Vue.component('customers-page', require('./components/Pages/CustomersPage.vue').default);
+Vue.component('employee-page', require('./components/Pages/EmployeePage.vue').default);
+Vue.component('employees-page', require('./components/Pages/EmployeesPage.vue').default);
 Vue.component('app', require('./components/App.vue').default);
 
 Vue.component('modal', require('./components/Modal.vue').default);

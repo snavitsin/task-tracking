@@ -91,10 +91,6 @@
           target="_blank"
           class="subdivision-page__project-link" />
         </div>
-        <div
-        v-if="false"
-        v-text="emp.emp_position_title"
-        class="subdivision-page__emp-position" />
       </div>
     </div>
 
