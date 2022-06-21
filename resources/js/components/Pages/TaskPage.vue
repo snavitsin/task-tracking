@@ -113,17 +113,32 @@
           <div
           v-text="'Комментарии'"
           class="task-page__comments-title" />
-          <div
+
+          <comment
+          v-if="!isNewTask"
+          :is-new-comment="true"
+          :task-id="taskData.task_id"
+          class="task-page__comment" />
+
+          <comment
           v-for="comment in comments"
           :key="comment.comment_id"
-          class="task-page__comment">
+          :comment="comment"
+          class="task-page__comment" />
+
+          <template v-if="false">
             <div
-            v-text="comment.comment_author"
-            class="task-page__comment-author" />
-            <div
-            v-text="comment.comment_comment"
-            class="task-page__comment-text" />
-          </div>
+            v-for="comment in comments"
+            :key="comment.comment_id"
+            class="task-page__comment">
+              <div
+              v-text="comment.comment_author"
+              class="task-page__comment-author" />
+              <div
+              v-text="comment.comment_comment"
+              class="task-page__comment-text" />
+            </div>
+          </template>
         </div>
       </div>
 
@@ -252,6 +267,7 @@ import FieldDropdown from "../Fields/FieldDropdown";
 import FieldInput from "../Fields/FieldInput";
 import FieldTextarea from "../Fields/FieldTextarea";
 import FieldDatepicker from "../Fields/FieldDatepicker";
+import Comment from "../Comment";
 
 import Modal from '../Modal';
 import { cloneDeep } from "lodash";
@@ -259,7 +275,7 @@ import { format } from "date-fns";
 
 export default {
   name: "TaskPage",
-  components: { Modal, FieldContainer, FieldDropdown, FieldInput, FieldTextarea, FieldDatepicker },
+  components: { Modal, FieldContainer, FieldDropdown, FieldInput, FieldTextarea, FieldDatepicker, Comment },
   props: {
     task: { type: Object, default: () => {} },
     taskEmps: { type: Array, default: () => [] },
@@ -369,7 +385,7 @@ export default {
       return this.isNewTask === true ? 'Создать' : 'Сохранить';
     },
     taskAuthor() {
-      const author = this.taskEmps.find(emp => emp.emp_position == 3);
+      const author = this.taskEmps.find(emp => emp.emp_position == 1);
       return author ? author.emp_fio : null;
     },
     isManager() {
@@ -610,9 +626,9 @@ export default {
   }
 
   &__comment {
-    padding: 10px;
-    background: #fff;
-    border: 1px solid #D3D8DB;
+    //padding: 10px;
+    //background: #fff;
+    //border: 1px solid #D3D8DB;
   }
 }
 </style>

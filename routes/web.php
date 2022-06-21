@@ -74,6 +74,12 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('emp/{id}', [App\Http\Controllers\StatisticsController::class, 'getEmpStat']);
     });
 
+    Route::group(['prefix' => 'comments'], function ()
+    {
+        Route::post('save', [App\Http\Controllers\CommentsController::class, 'saveComment']);
+        Route::post('delete', [App\Http\Controllers\CommentsController::class, 'deleteComment']);
+    });
+
 //    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 //
 //    Route::post('/home/tasks', [App\Http\Controllers\HomeController::class, 'getTasks'])->name('tasks');

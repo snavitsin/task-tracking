@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CommentModel extends Model
@@ -54,40 +55,32 @@ class CommentModel extends Model
         return array_values($comments);
     }
 
-    public function getTask()
+    public function updateComment()
     {
-        $taskId = $this->attributes['task_id'];
-        $task = TaskModel::find($taskId);
-        return $task;
-    }
-
-    public function getUserTasks()
-    {
-        $tasks = DB::table('tasks')->join('ref_task_emp as RTE', function($join){
-        $join->on('tasks.task_id', '=', 'RTE.ref_task_emp_task')
-            ->where('RTE.ref_task_emp_emp', $this->attributes['emp_id']);
-        })->select()->get()->all();
-        $tasks = array_values($tasks);
-        return $tasks;
-        //return $this->getRelatedValues($tasks);
-    }
-
-    public function updateTaskStatus() {
-        $taskId = $this->attributes['task_id'];
-        $statusId = $this->attributes['status_id'];
-        $task = TaskModel::find($taskId);
+        $isNew = !isset($this->attributes['comment_id']);
         $result = null;
-        if($task) {
-            $task->attributes['task_status'] = $statusId;
-            $result = $task->save();
+        if($isNew) {
+            $comment = new CommentModel($this->attributes);
+            $comment->attributes['comment_emp'] = Auth::user()->getUserId();
+            $result = $comment->save();
         }
-        return $result;
+        else {
+            $comment = CommentModel::find($this->attributes['comment_id']);
+            $result = null;
+
+            if ($comment) {
+                $comment->attributes = $this->attributes;
+                $result = $comment->save();
+            }
+        }
+
+        return boolval($result);
     }
 
     public function getCommentAuthorAttribute(){
         $userId = $this->attributes['comment_emp'];
-        $user = User::find($userId)->first();
-        return $user->getEmpFioAttribute();
+        $user = User::find($userId)->toArray();
+        return $user['emp_fio'];
     }
 
     public function getCommentTaskTitleAttribute(){
